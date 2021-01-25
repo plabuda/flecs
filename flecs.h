@@ -2161,6 +2161,12 @@ typedef struct ecs_snapshot_t ecs_snapshot_t;
 /** Queries are the primary mechanism for iterating (prematched) entities. */
 typedef struct ecs_query_t ecs_query_t;
 
+/** Rules are complex queries that can traverse entity relationships */
+typedef struct ecs_rule_t ecs_rule_t;
+
+/** Rules are complex queries that can traverse entity relationships */
+typedef struct ecs_rule_iter_t ecs_rule_iter_t;
+
 /* An iterator lets an application iterate entities across tables. */
 typedef struct ecs_iter_t ecs_iter_t;
 
@@ -2629,6 +2635,11 @@ typedef enum ecs_sig_oper_kind_t {
     EcsOperLast = 5
 } ecs_sig_oper_kind_t;
 
+typedef struct ecs_sig_identifier_t {
+    ecs_entity_t entity;
+    char *name;
+} ecs_sig_identifier_t;
+
 /** Type that describes a single column in the system signature */
 typedef struct ecs_sig_column_t {
     ecs_sig_from_kind_t from_kind;   /* Element kind (Entity, Component) */
@@ -2639,9 +2650,11 @@ typedef struct ecs_sig_column_t {
         ecs_entity_t component;      /* Used for AND operator */
     } is;
     ecs_entity_t source;             /* Source entity (used with FromEntity) */
+    
+    ecs_sig_identifier_t type;
     char *name;                      /* Name of column */
-    char **argv;
     int32_t argc;
+    ecs_sig_identifier_t *argv;
 } ecs_sig_column_t;
 
 /** Type that stores a parsed signature */
@@ -2653,7 +2666,7 @@ typedef struct ecs_sig_t {
 
 /** Parse signature. */
 FLECS_API
-void ecs_sig_init(
+int ecs_sig_init(
     ecs_world_t *world,
     const char *name,
     const char *expr,
@@ -2674,6 +2687,7 @@ int ecs_sig_add(
     ecs_sig_inout_kind_t access_kind,
     ecs_entity_t component,
     ecs_entity_t source,
+    const char *arg_type,
     const char *arg_name,
     int argc,
     char **argv);
@@ -3181,6 +3195,7 @@ typedef struct EcsTrigger {
 #define EcsWorld (ECS_HI_COMPONENT_ID + 25)
 #define EcsSingleton (ECS_HI_COMPONENT_ID + 26)
 #define EcsWildcard (ECS_HI_COMPONENT_ID + 27)
+#define EcsThis (ECS_HI_COMPONENT_ID + 28)
 
 /* Value used to quickly check if component is builtin. This is used to quickly
  * filter out tables with builtin components (for example for ecs_delete) */
@@ -5383,6 +5398,22 @@ bool ecs_query_changed(
 FLECS_API
 bool ecs_query_orphaned(
     ecs_query_t *query);
+
+/** @} */
+
+/**
+ * @defgroup rules Rules
+ * @{
+ */
+
+FLECS_API
+ecs_rule_t* ecs_rule_new(
+    ecs_world_t *world,
+    const char *expr);
+
+FLECS_API
+ecs_rule_iter_t* ecs_rule_iter_new(
+    const ecs_rule_t *rule);
 
 /** @} */
 
