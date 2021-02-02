@@ -36,6 +36,7 @@
 #define FLECS_SNAPSHOT
 #define FLECS_DIRECT_ACCESS
 #define FLECS_STATS
+#define FLECS_PLECS
 #endif
 
 /* Set to double or int to increase accuracy of time keeping. Note that when
@@ -3159,7 +3160,9 @@ int32_t ecs_table_count(
 #ifdef FLECS_STATS
 #include "flecs/addons/stats.h"
 #endif
-
+#ifdef FLECS_PLECS
+#include "flecs/addons/plecs.h"
+#endif
 #ifdef __cplusplus
 }
 
