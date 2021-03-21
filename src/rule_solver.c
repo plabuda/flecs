@@ -1952,7 +1952,11 @@ char* ecs_rule_str(
             ecs_rule_var_t *type_var = &rule->variables[type];
             type_name = type_var->name;
         } else {
-            type_name = ecs_get_name(rule->world, type);
+            if (type) {
+                type_name = ecs_get_name(rule->world, type);
+            } else {
+                type_name = NULL;
+            }
         }
 
         if (object) {

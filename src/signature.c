@@ -878,7 +878,7 @@ int ecs_sig_add(
         elem->pred.name = NULL;
         if (arg_type) {
             elem->pred.name = ecs_os_strdup(arg_type);
-        }    
+        }
 
         if (argc) {
             elem->argv = ecs_os_malloc(ECS_SIZEOF(ecs_sig_identifier_t) * argc);
