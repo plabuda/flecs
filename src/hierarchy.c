@@ -15,7 +15,7 @@ bool path_append(
     ecs_assert(world->magic == ECS_WORLD_MAGIC, ECS_INTERNAL_ERROR, NULL);
 
     ecs_type_t type = ecs_get_type(world, child);
-    ecs_entity_t cur = ecs_find_in_type(world, type, component, ECS_CHILDOF);
+    ecs_entity_t cur = ecs_find_in_type(world, type, component, EcsChildOf);
     
     if (cur) {
         if (cur != parent && cur != EcsFlecsCore) {
@@ -90,7 +90,7 @@ ecs_entity_t find_child_in_table(
     const char *name)
 {
     /* If table doesn't have EcsName, then don't bother */
-    int32_t name_index = ecs_type_index_of(table->type, ecs_typeid(EcsName));
+    int32_t name_index = ecs_type_index_of(table->type, ecs_id(EcsName));
     if (name_index == -1) {
         return 0;
     }
@@ -356,7 +356,7 @@ tail:
     if (!cur) {
         if (!core_searched) {
             if (parent) {
-                parent = ecs_get_parent_w_entity(world, parent, 0);
+                parent = ecs_get_object_w_id(world, parent, EcsChildOf, 0);
             } else {
                 parent = EcsFlecsCore;
                 core_searched = true;
@@ -374,7 +374,7 @@ ecs_entity_t ecs_set_scope(
 {
     ecs_stage_t *stage = ecs_stage_from_world(&world);
 
-    ecs_entity_t e = ECS_CHILDOF | scope;
+    ecs_entity_t e = ecs_pair(EcsChildOf, scope);
     ecs_entities_t to_add = {
         .array = &e,
         .count = 1
@@ -424,11 +424,11 @@ int32_t ecs_get_child_count(
 }
 
 ecs_iter_t ecs_scope_iter(
-    ecs_world_t *world,
+    ecs_world_t *iter_world,
     ecs_entity_t parent)
 {
-    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
-    world = (ecs_world_t*)ecs_get_world(world);
+    ecs_assert(iter_world != NULL, ECS_INTERNAL_ERROR, NULL);
+    const ecs_world_t *world = (ecs_world_t*)ecs_get_world(iter_world);
 
     ecs_scope_iter_t iter = {
         .tables = ecs_map_get_ptr(world->child_tables, ecs_vector_t*, parent),
@@ -436,18 +436,18 @@ ecs_iter_t ecs_scope_iter(
     };
 
     return (ecs_iter_t) {
-        .world = world,
+        .world = iter_world,
         .iter.parent = iter
     };
 }
 
 ecs_iter_t ecs_scope_iter_w_filter(
-    ecs_world_t *world,
+    ecs_world_t *iter_world,
     ecs_entity_t parent,
     ecs_filter_t *filter)
 {
-    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
-    world = (ecs_world_t*)ecs_get_world(world);
+    ecs_assert(iter_world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_world_t *world = (ecs_world_t*)ecs_get_world(iter_world);
 
     ecs_scope_iter_t iter = {
         .filter = *filter,
@@ -456,7 +456,7 @@ ecs_iter_t ecs_scope_iter_w_filter(
     };
 
     return (ecs_iter_t) {
-        .world = world,
+        .world = iter_world,
         .iter.parent = iter,
         .table_count = ecs_vector_count(iter.tables)
     };
@@ -533,7 +533,7 @@ ecs_entity_t ecs_add_path_w_sep(
         }
 
         if (parent) {
-            ecs_add_entity(world, entity, ECS_CHILDOF | entity);
+            ecs_add_pair(world, entity, EcsChildOf, entity);
         }
 
         return entity;
@@ -564,7 +564,7 @@ ecs_entity_t ecs_add_path_w_sep(
             ecs_os_free(name);
 
             if (cur) {
-                ecs_add_entity(world, e, ECS_CHILDOF | cur);
+                ecs_add_pair(world, e, EcsChildOf, cur);
             }
         }
 

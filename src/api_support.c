@@ -13,7 +13,7 @@ int parse_type_action(
     ecs_entity_t role,
     const char *entity_id,
     const char *source_id,
-    const char *trait_id,
+    const char *pair_id,
     const char *arg_name,
     int argc,
     char **argv,
@@ -59,15 +59,15 @@ int parse_type_action(
             return -1;
         }
 
-        if (trait_id) {
-            ecs_entity_t trait = ecs_lookup_fullpath(world, trait_id);
-            if (!trait) {
+        if (pair_id) {
+            ecs_entity_t pair = ecs_lookup_fullpath(world, pair_id);
+            if (!pair) {
                 ecs_parser_error(name, sig, column, 
-                    "unresolved trait identifier '%s'", trait_id);
+                    "unresolved pair identifier '%s'", pair_id);
                 return -1;
             }
 
-            entity = ecs_entity_t_comb(entity, trait);
+            entity = ecs_entity_t_comb(entity, pair);
         }        
 
         if (oper_kind == EcsOperAnd) {
@@ -127,7 +127,7 @@ EcsType type_from_vec(
     for (i = 0; i < count; i ++) {
         ecs_entity_t e = array[i];
         if (ECS_HAS_ROLE(e, AND)) {
-            ecs_entity_t entity = e & ECS_COMPONENT_MASK;
+            ecs_entity_t entity = ECS_PAIR_OBJECT(e);
             const EcsType *type_ptr = ecs_get(world, entity, EcsType);
             ecs_assert(type_ptr != NULL, ECS_INVALID_PARAMETER, 
                 "flag must be applied to type");
@@ -163,7 +163,9 @@ EcsType type_from_expr(
 {
     if (expr) {
         ecs_vector_t *vec = ecs_vector_new(ecs_entity_t, 1);
-        ecs_parse_expr(world, name, expr, parse_type_action, &vec);
+        if (ecs_parse_expr(world, name, expr, parse_type_action, &vec)) {
+            ecs_abort(ECS_INVALID_SIGNATURE, expr);
+        }
         EcsType result = type_from_vec(world, vec);
         ecs_vector_free(vec);
         return result;
@@ -230,7 +232,7 @@ ecs_entity_t ecs_lookup_w_id(
         if (!ecs_exists(world, e)) {
             ecs_entity_t scope = world->stage.scope;
             if (scope) {
-                ecs_add_entity(world, e, ECS_CHILDOF | scope);
+                ecs_add_pair(world, e, EcsChildOf, scope);
             }
         }
 
@@ -291,7 +293,9 @@ ecs_entity_t ecs_new_entity(
     const char *expr)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_stage_from_world(&world);
+
+    /* Function cannot be called from a stage, use regular ecs_new */
+    ecs_assert(world->magic == ECS_WORLD_MAGIC, ECS_INVALID_PARAMETER, NULL);
 
     ecs_entity_t result = ecs_lookup_w_id(world, e, name);
     if (!result) {
@@ -313,7 +317,9 @@ ecs_entity_t ecs_new_prefab(
     const char *expr)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_stage_from_world(&world);
+
+    /* Function cannot be called from a stage, use regular ecs_new */
+    ecs_assert(world->magic == ECS_WORLD_MAGIC, ECS_INVALID_PARAMETER, NULL);
 
     ecs_entity_t result = ecs_lookup_w_id(world, e, name);
     if (!result) {
@@ -321,7 +327,7 @@ ecs_entity_t ecs_new_prefab(
         ecs_set_symbol(world, result, name);
     }
 
-    ecs_add_entity(world, result, EcsPrefab);
+    ecs_add_id(world, result, EcsPrefab);
 
     EcsType type = type_from_expr(world, name, expr);
     ecs_add_type(world, result, type.normalized);
@@ -361,7 +367,7 @@ ecs_entity_t ecs_new_component(
     /* ecs_new_component_id does not add the scope, so add it explicitly */
     ecs_entity_t scope = world->stage.scope;
     if (scope) {
-        ecs_add_entity(world, result, ECS_CHILDOF | scope);
+        ecs_add_pair(world, result, EcsChildOf, scope);
     }
 
     if (found) {

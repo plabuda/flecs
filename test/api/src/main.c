@@ -105,12 +105,12 @@ void New_w_Count_new_w_data_1_comp(void);
 void New_w_Count_new_w_data_2_comp(void);
 void New_w_Count_new_w_data_w_tag(void);
 void New_w_Count_new_w_data_w_comp_and_tag(void);
-void New_w_Count_new_w_data_trait(void);
-void New_w_Count_new_w_data_trait_tag(void);
+void New_w_Count_new_w_data_pair(void);
+void New_w_Count_new_w_data_pair(void);
 void New_w_Count_new_w_data_2_comp_1_not_set(void);
 void New_w_Count_new_w_on_add_on_set_monitor(void);
 void New_w_Count_new_w_data_override_set_comp(void);
-void New_w_Count_new_w_data_override_set_trait(void);
+void New_w_Count_new_w_data_override_set_pair(void);
 
 // Testsuite 'Add'
 void Add_zero(void);
@@ -181,7 +181,7 @@ void Switch_switch_no_match_for_case(void);
 void Switch_empty_entity_has_case(void);
 void Switch_zero_entity_has_case(void);
 void Switch_add_to_entity_w_switch(void);
-void Switch_add_trait_to_entity_w_switch(void);
+void Switch_add_pair_to_entity_w_switch(void);
 void Switch_sort(void);
 void Switch_recycled_tags(void);
 void Switch_query_recycled_tags(void);
@@ -326,6 +326,10 @@ void Hierarchies_get_child_count_2_tables(void);
 void Hierarchies_get_child_count_no_children(void);
 void Hierarchies_scope_iter_after_delete_tree(void);
 void Hierarchies_add_child_after_delete_tree(void);
+void Hierarchies_add_child_to_recycled_parent(void);
+void Hierarchies_get_type_after_recycled_parent_add(void);
+void Hierarchies_rematch_after_add_to_recycled_parent(void);
+void Hierarchies_cascade_after_recycled_parent_change(void);
 
 // Testsuite 'Add_bulk'
 void Add_bulk_add_comp_from_comp_to_empty(void);
@@ -438,6 +442,13 @@ void Delete_alive_while_staged_w_delete(void);
 void Delete_alive_while_staged_w_delete_recycled_id(void);
 void Delete_alive_after_recycle(void);
 void Delete_delete_recycled(void);
+void Delete_get_alive_for_alive(void);
+void Delete_get_alive_for_recycled(void);
+void Delete_get_alive_for_not_alive(void);
+void Delete_get_alive_w_generation_for_recycled_alive(void);
+void Delete_get_alive_w_generation_for_recycled_not_alive(void);
+void Delete_get_alive_for_0(void);
+void Delete_get_alive_for_nonexistent(void);
 
 // Testsuite 'Delete_w_filter'
 void Delete_w_filter_delete_1(void);
@@ -473,8 +484,8 @@ void Set_get_mut_tag_new(void);
 void Set_get_mut_tag_existing(void);
 void Set_get_mut_tag_new_w_comp(void);
 void Set_get_mut_tag_existing_w_comp(void);
-void Set_get_mut_tag_new_w_trait(void);
-void Set_get_mut_tag_existing_w_trait(void);
+void Set_get_mut_tag_new_w_pair(void);
+void Set_get_mut_tag_existing_w_pair(void);
 void Set_modified_w_on_set(void);
 void Set_modified_no_component(void);
 void Set_get_mut_w_add_in_on_add(void);
@@ -558,19 +569,19 @@ void ComponentLifecycle_move_on_tag(void);
 void ComponentLifecycle_merge_to_different_table(void);
 void ComponentLifecycle_merge_to_new_table(void);
 void ComponentLifecycle_delete_in_stage(void);
-void ComponentLifecycle_ctor_on_add_trait(void);
-void ComponentLifecycle_ctor_on_add_trait_set_ctor_after_table(void);
-void ComponentLifecycle_ctor_on_add_trait_tag(void);
-void ComponentLifecycle_ctor_on_add_trait_tag_set_ctor_after_table(void);
-void ComponentLifecycle_ctor_on_move_trait(void);
+void ComponentLifecycle_ctor_on_add_pair(void);
+void ComponentLifecycle_ctor_on_add_pair_set_ctor_after_table(void);
+void ComponentLifecycle_ctor_on_add_pair_tag(void);
+void ComponentLifecycle_ctor_on_add_pair_tag_set_ctor_after_table(void);
+void ComponentLifecycle_ctor_on_move_pair(void);
 void ComponentLifecycle_move_on_realloc(void);
 void ComponentLifecycle_move_on_dim(void);
 void ComponentLifecycle_move_on_bulk_new(void);
 void ComponentLifecycle_move_on_delete(void);
-void ComponentLifecycle_copy_on_override_trait(void);
-void ComponentLifecycle_copy_on_override_trait_tag(void);
-void ComponentLifecycle_copy_on_set_trait(void);
-void ComponentLifecycle_copy_on_set_trait_tag(void);
+void ComponentLifecycle_copy_on_override_pair(void);
+void ComponentLifecycle_copy_on_override_pair_tag(void);
+void ComponentLifecycle_copy_on_set_pair(void);
+void ComponentLifecycle_copy_on_set_pair_tag(void);
 void ComponentLifecycle_prevent_lifecycle_overwrite(void);
 void ComponentLifecycle_prevent_lifecycle_overwrite_null_callbacks(void);
 void ComponentLifecycle_allow_lifecycle_overwrite_equal_callbacks(void);
@@ -594,6 +605,16 @@ void Pipeline_no_merge_after_staged_in_out(void);
 void Pipeline_merge_after_staged_out_before_owned(void);
 void Pipeline_switch_pipeline(void);
 void Pipeline_run_pipeline(void);
+void Pipeline_get_pipeline_from_stage(void);
+void Pipeline_3_systems_3_types(void);
+void Pipeline_random_read_after_random_write_out_in(void);
+void Pipeline_random_read_after_random_write_inout_in(void);
+void Pipeline_random_read_after_random_write_out_inout(void);
+void Pipeline_random_read_after_random_write_inout_inout(void);
+void Pipeline_random_read_after_random_write_w_not_write(void);
+void Pipeline_random_read_after_random_write_w_not_read(void);
+void Pipeline_random_read_after_random_write_w_wildcard(void);
+void Pipeline_random_in_after_random_inout_after_random_out(void);
 
 // Testsuite 'SystemMisc'
 void SystemMisc_setup(void);
@@ -679,7 +700,7 @@ void SystemMisc_rw_out_explicit_any(void);
 void SystemMisc_rw_out_explicit_shared(void);
 void SystemMisc_rw_out_explicit_from_empty(void);
 void SystemMisc_rw_out_explicit_from_entity(void);
-void SystemMisc_activate_system_for_table_w_n_traits(void);
+void SystemMisc_activate_system_for_table_w_n_pairs(void);
 void SystemMisc_get_query(void);
 
 // Testsuite 'Sorting'
@@ -700,6 +721,12 @@ void Sorting_sort_1000_entities(void);
 void Sorting_sort_1000_entities_w_duplicates(void);
 void Sorting_sort_1000_entities_again(void);
 void Sorting_sort_1000_entities_2_types(void);
+void Sorting_sort_1500_entities_3_types(void);
+void Sorting_sort_2000_entities_4_types(void);
+void Sorting_sort_2_entities_2_types(void);
+void Sorting_sort_3_entities_3_types(void);
+void Sorting_sort_3_entities_3_types_2(void);
+void Sorting_sort_4_entities_4_types(void);
 void Sorting_sort_1000_entities_2_types_again(void);
 void Sorting_sort_1000_entities_add_type_after_sort(void);
 void Sorting_sort_shared_component(void);
@@ -710,6 +737,7 @@ void Queries_query_changed_after_delete(void);
 void Queries_query_changed_after_add(void);
 void Queries_query_changed_after_remove(void);
 void Queries_query_changed_after_set(void);
+void Queries_query_change_after_modified(void);
 void Queries_query_change_after_out_system(void);
 void Queries_query_change_after_in_system(void);
 void Queries_subquery_match_existing(void);
@@ -719,7 +747,7 @@ void Queries_subquery_unmatch(void);
 void Queries_subquery_rematch(void);
 void Queries_subquery_rematch_w_parent_optional(void);
 void Queries_subquery_rematch_w_sub_optional(void);
-void Queries_query_single_trait(void);
+void Queries_query_single_pairs(void);
 void Queries_query_single_instanceof(void);
 void Queries_query_single_childof(void);
 void Queries_query_w_filter(void);
@@ -737,32 +765,32 @@ void Queries_nested_orphaned_query(void);
 void Queries_invalid_access_orphaned_query(void);
 void Queries_stresstest_query_free(void);
 
-// Testsuite 'Traits'
-void Traits_type_w_one_trait(void);
-void Traits_type_w_two_traits(void);
-void Traits_add_trait(void);
-void Traits_remove_trait(void);
-void Traits_add_tag_trait_for_tag(void);
-void Traits_add_tag_trait_for_component(void);
-void Traits_query_2_traits(void);
-void Traits_query_2_traits_2_instances_per_type(void);
-void Traits_query_trait_or_component(void);
-void Traits_query_trait_or_trait(void);
-void Traits_query_not_trait(void);
-void Traits_override_trait(void);
-void Traits_override_tag_trait(void);
-void Traits_trait_w_component_query(void);
-void Traits_trait_wildcard_system(void);
-void Traits_trait_only_wildcard_system(void);
-void Traits_trait_wildcard_on_set(void);
-void Traits_on_add_trait(void);
-void Traits_on_add_trait_tag(void);
-void Traits_on_remove_trait(void);
-void Traits_on_remove_trait_tag(void);
-void Traits_on_remove_trait_on_delete(void);
-void Traits_on_remove_trait_tag_on_delete(void);
-void Traits_trait_from_shared(void);
-void Traits_simple_trait_syntax(void);
+// Testsuite 'Pairs'
+void Pairs_type_w_one_pair(void);
+void Pairs_type_w_two_pairs(void);
+void Pairs_add_pair(void);
+void Pairs_remove_pair(void);
+void Pairs_add_tag_pair_for_tag(void);
+void Pairs_add_tag_pair_for_component(void);
+void Pairs_query_2_pairs(void);
+void Pairs_query_2_pairs_2_instances_per_type(void);
+void Pairs_query_pair_or_component(void);
+void Pairs_query_pair_or_pair(void);
+void Pairs_query_not_pair(void);
+void Pairs_override_pair(void);
+void Pairs_override_tag_pair(void);
+void Pairs_pair_w_component_query(void);
+void Pairs_pair_wildcard_system(void);
+void Pairs_pair_only_wildcard_system(void);
+void Pairs_pair_wildcard_on_set(void);
+void Pairs_on_add_pair(void);
+void Pairs_on_add_pair_tag(void);
+void Pairs_on_remove_pair(void);
+void Pairs_on_remove_pair_tag(void);
+void Pairs_on_remove_pair_on_delete(void);
+void Pairs_on_remove_pair_tag_on_delete(void);
+void Pairs_pair_from_shared(void);
+void Pairs_simple_pair_syntax(void);
 
 // Testsuite 'TriggerOnAdd'
 void TriggerOnAdd_setup(void);
@@ -965,11 +993,12 @@ void SystemOnDemand_on_demand_task_w_not_from_entity(void);
 void SystemOnDemand_enable_after_user_disable(void);
 
 // Testsuite 'SystemCascade'
-void SystemCascade_setup(void);
 void SystemCascade_cascade_depth_1(void);
 void SystemCascade_cascade_depth_2(void);
 void SystemCascade_add_after_match(void);
 void SystemCascade_adopt_after_match(void);
+void SystemCascade_rematch_w_empty_table(void);
+void SystemCascade_query_w_only_cascade(void);
 
 // Testsuite 'SystemManual'
 void SystemManual_setup(void);
@@ -1049,7 +1078,7 @@ void Prefab_force_owned(void);
 void Prefab_force_owned_2(void);
 void Prefab_force_owned_nested(void);
 void Prefab_force_owned_type(void);
-void Prefab_force_owned_type_w_trait(void);
+void Prefab_force_owned_type_w_pair(void);
 void Prefab_prefab_instanceof_hierarchy(void);
 void Prefab_override_tag(void);
 void Prefab_empty_prefab(void);
@@ -1060,6 +1089,17 @@ void Prefab_override_2_prefabs(void);
 void Prefab_rematch_after_add_instanceof_to_parent(void);
 void Prefab_child_of_instance(void);
 void Prefab_rematch_after_prefab_delete(void);
+void Prefab_add_tag_w_low_id_to_instance(void);
+void Prefab_get_type_after_base_add(void);
+void Prefab_get_type_after_recycled_base_add(void);
+void Prefab_new_w_recycled_base(void);
+void Prefab_add_recycled_base(void);
+void Prefab_remove_recycled_base(void);
+void Prefab_get_from_recycled_base(void);
+void Prefab_override_from_recycled_base(void);
+void Prefab_remove_override_from_recycled_base(void);
+void Prefab_instantiate_tree_from_recycled_base(void);
+void Prefab_rematch_after_add_to_recycled_base(void);
 
 // Testsuite 'System_w_FromContainer'
 void System_w_FromContainer_setup(void);
@@ -1146,18 +1186,17 @@ void Type_type_has(void);
 void Type_type_has_not(void);
 void Type_zero_type_has_not(void);
 void Type_type_has_prefab(void);
-void Type_type_has_container(void);
-void Type_type_has_prefab_container(void);
-void Type_type_has_trait(void);
-void Type_type_has_trait_exact(void);
-void Type_type_has_trait_wildcard(void);
-void Type_type_has_trait_wildcard_multiple(void);
-void Type_type_has_trait_wildcard_no_trait(void);
-void Type_type_owns_trait(void);
-void Type_type_owns_trait_exact(void);
-void Type_type_owns_trait_wildcard(void);
-void Type_type_owns_trait_wildcard_multiple(void);
-void Type_type_owns_trait_wildcard_no_trait(void);
+void Type_type_has_parent(void);
+void Type_type_has_pair(void);
+void Type_type_has_pair_exact(void);
+void Type_type_has_pair_wildcard(void);
+void Type_type_has_pair_wildcard_multiple(void);
+void Type_type_has_pair_wildcard_no_pair(void);
+void Type_type_owns_pair(void);
+void Type_type_owns_pair_exact(void);
+void Type_type_owns_pair_wildcard(void);
+void Type_type_owns_pair_wildcard_multiple(void);
+void Type_type_owns_pair_wildcard_no_pair(void);
 void Type_type_merge(void);
 void Type_type_merge_overlap(void);
 void Type_type_merge_overlap_one(void);
@@ -1193,21 +1232,21 @@ void Type_type_to_expr_1_comp(void);
 void Type_type_to_expr_2_comp(void);
 void Type_type_to_expr_instanceof(void);
 void Type_type_to_expr_childof(void);
-void Type_type_to_expr_trait(void);
-void Type_type_to_expr_trait_w_comp(void);
+void Type_type_to_expr_pair(void);
+void Type_type_to_expr_pair_w_comp(void);
 void Type_type_to_expr_scope(void);
 void Type_type_from_expr(void);
 void Type_type_from_expr_scope(void);
 void Type_type_from_expr_digit(void);
 void Type_type_from_expr_instanceof(void);
 void Type_type_from_expr_childof(void);
-void Type_type_from_expr_trait(void);
-void Type_type_from_expr_trait_w_comp(void);
+void Type_type_from_expr_pair(void);
+void Type_type_from_expr_pair_w_comp(void);
 void Type_entity_str(void);
 void Type_entity_path_str(void);
 void Type_entity_instanceof_str(void);
 void Type_entity_childof_str(void);
-void Type_entity_trait_str(void);
+void Type_entity_pair_str(void);
 void Type_entity_switch_str(void);
 void Type_entity_case_str(void);
 void Type_entity_and_str(void);
@@ -1217,7 +1256,7 @@ void Type_entity_not_str(void);
 void Type_entity_str_small_buffer(void);
 void Type_role_childof_str(void);
 void Type_role_instanceof_str(void);
-void Type_role_trait_str(void);
+void Type_role_pair_str(void);
 void Type_role_switch_str(void);
 void Type_role_case_str(void);
 void Type_role_and_str(void);
@@ -1290,12 +1329,13 @@ void MultiThread_change_thread_count(void);
 void MultiThread_multithread_quit(void);
 void MultiThread_schedule_w_tasks(void);
 void MultiThread_reactive_system(void);
+void MultiThread_fini_after_set_threads(void);
 
 // Testsuite 'DeferredActions'
 void DeferredActions_defer_new(void);
 void DeferredActions_defer_bulk_new(void);
 void DeferredActions_defer_bulk_new_w_data(void);
-void DeferredActions_defer_bulk_new_w_data_trait(void);
+void DeferredActions_defer_bulk_new_w_data_pair(void);
 void DeferredActions_defer_bulk_new_two(void);
 void DeferredActions_defer_bulk_new_w_data_two(void);
 void DeferredActions_defer_add(void);
@@ -1311,7 +1351,7 @@ void DeferredActions_system_in_progress_w_defer(void);
 void DeferredActions_defer_get_mut_no_modify(void);
 void DeferredActions_defer_get_mut_w_modify(void);
 void DeferredActions_defer_modify(void);
-void DeferredActions_defer_set_trait(void);
+void DeferredActions_defer_set_pair(void);
 void DeferredActions_defer_clear(void);
 void DeferredActions_defer_add_after_delete(void);
 void DeferredActions_defer_set_after_delete(void);
@@ -1326,7 +1366,7 @@ void DeferredActions_discard_remove_two(void);
 void DeferredActions_discard_child(void);
 void DeferredActions_discard_child_w_add(void);
 void DeferredActions_defer_return_value(void);
-void DeferredActions_defer_get_mut_trait(void);
+void DeferredActions_defer_get_mut_pair(void);
 
 // Testsuite 'SingleThreadStaging'
 void SingleThreadStaging_setup(void);
@@ -1564,6 +1604,9 @@ void Error_log_dbg(void);
 void Error_log_log(void);
 void Error_log_warning(void);
 void Error_log_error(void);
+
+// Testsuite 'Deprecated'
+void Deprecated_trait_type_str(void);
 
 bake_test_case Rules_testcases[] = {
     {
@@ -1937,12 +1980,12 @@ bake_test_case New_w_Count_testcases[] = {
         New_w_Count_new_w_data_w_comp_and_tag
     },
     {
-        "new_w_data_trait",
-        New_w_Count_new_w_data_trait
+        "new_w_data_pair",
+        New_w_Count_new_w_data_pair
     },
     {
-        "new_w_data_trait_tag",
-        New_w_Count_new_w_data_trait_tag
+        "new_w_data_pair",
+        New_w_Count_new_w_data_pair
     },
     {
         "new_w_data_2_comp_1_not_set",
@@ -1957,8 +2000,8 @@ bake_test_case New_w_Count_testcases[] = {
         New_w_Count_new_w_data_override_set_comp
     },
     {
-        "new_w_data_override_set_trait",
-        New_w_Count_new_w_data_override_set_trait
+        "new_w_data_override_set_pair",
+        New_w_Count_new_w_data_override_set_pair
     }
 };
 
@@ -2227,8 +2270,8 @@ bake_test_case Switch_testcases[] = {
         Switch_add_to_entity_w_switch
     },
     {
-        "add_trait_to_entity_w_switch",
-        Switch_add_trait_to_entity_w_switch
+        "add_pair_to_entity_w_switch",
+        Switch_add_pair_to_entity_w_switch
     },
     {
         "sort",
@@ -2781,6 +2824,22 @@ bake_test_case Hierarchies_testcases[] = {
     {
         "add_child_after_delete_tree",
         Hierarchies_add_child_after_delete_tree
+    },
+    {
+        "add_child_to_recycled_parent",
+        Hierarchies_add_child_to_recycled_parent
+    },
+    {
+        "get_type_after_recycled_parent_add",
+        Hierarchies_get_type_after_recycled_parent_add
+    },
+    {
+        "rematch_after_add_to_recycled_parent",
+        Hierarchies_rematch_after_add_to_recycled_parent
+    },
+    {
+        "cascade_after_recycled_parent_change",
+        Hierarchies_cascade_after_recycled_parent_change
     }
 };
 
@@ -3177,6 +3236,34 @@ bake_test_case Delete_testcases[] = {
     {
         "delete_recycled",
         Delete_delete_recycled
+    },
+    {
+        "get_alive_for_alive",
+        Delete_get_alive_for_alive
+    },
+    {
+        "get_alive_for_recycled",
+        Delete_get_alive_for_recycled
+    },
+    {
+        "get_alive_for_not_alive",
+        Delete_get_alive_for_not_alive
+    },
+    {
+        "get_alive_w_generation_for_recycled_alive",
+        Delete_get_alive_w_generation_for_recycled_alive
+    },
+    {
+        "get_alive_w_generation_for_recycled_not_alive",
+        Delete_get_alive_w_generation_for_recycled_not_alive
+    },
+    {
+        "get_alive_for_0",
+        Delete_get_alive_for_0
+    },
+    {
+        "get_alive_for_nonexistent",
+        Delete_get_alive_for_nonexistent
     }
 };
 
@@ -3309,12 +3396,12 @@ bake_test_case Set_testcases[] = {
         Set_get_mut_tag_existing_w_comp
     },
     {
-        "get_mut_tag_new_w_trait",
-        Set_get_mut_tag_new_w_trait
+        "get_mut_tag_new_w_pair",
+        Set_get_mut_tag_new_w_pair
     },
     {
-        "get_mut_tag_existing_w_trait",
-        Set_get_mut_tag_existing_w_trait
+        "get_mut_tag_existing_w_pair",
+        Set_get_mut_tag_existing_w_pair
     },
     {
         "modified_w_on_set",
@@ -3621,24 +3708,24 @@ bake_test_case ComponentLifecycle_testcases[] = {
         ComponentLifecycle_delete_in_stage
     },
     {
-        "ctor_on_add_trait",
-        ComponentLifecycle_ctor_on_add_trait
+        "ctor_on_add_pair",
+        ComponentLifecycle_ctor_on_add_pair
     },
     {
-        "ctor_on_add_trait_set_ctor_after_table",
-        ComponentLifecycle_ctor_on_add_trait_set_ctor_after_table
+        "ctor_on_add_pair_set_ctor_after_table",
+        ComponentLifecycle_ctor_on_add_pair_set_ctor_after_table
     },
     {
-        "ctor_on_add_trait_tag",
-        ComponentLifecycle_ctor_on_add_trait_tag
+        "ctor_on_add_pair_tag",
+        ComponentLifecycle_ctor_on_add_pair_tag
     },
     {
-        "ctor_on_add_trait_tag_set_ctor_after_table",
-        ComponentLifecycle_ctor_on_add_trait_tag_set_ctor_after_table
+        "ctor_on_add_pair_tag_set_ctor_after_table",
+        ComponentLifecycle_ctor_on_add_pair_tag_set_ctor_after_table
     },
     {
-        "ctor_on_move_trait",
-        ComponentLifecycle_ctor_on_move_trait
+        "ctor_on_move_pair",
+        ComponentLifecycle_ctor_on_move_pair
     },
     {
         "move_on_realloc",
@@ -3657,20 +3744,20 @@ bake_test_case ComponentLifecycle_testcases[] = {
         ComponentLifecycle_move_on_delete
     },
     {
-        "copy_on_override_trait",
-        ComponentLifecycle_copy_on_override_trait
+        "copy_on_override_pair",
+        ComponentLifecycle_copy_on_override_pair
     },
     {
-        "copy_on_override_trait_tag",
-        ComponentLifecycle_copy_on_override_trait_tag
+        "copy_on_override_pair_tag",
+        ComponentLifecycle_copy_on_override_pair_tag
     },
     {
-        "copy_on_set_trait",
-        ComponentLifecycle_copy_on_set_trait
+        "copy_on_set_pair",
+        ComponentLifecycle_copy_on_set_pair
     },
     {
-        "copy_on_set_trait_tag",
-        ComponentLifecycle_copy_on_set_trait_tag
+        "copy_on_set_pair_tag",
+        ComponentLifecycle_copy_on_set_pair_tag
     },
     {
         "prevent_lifecycle_overwrite",
@@ -3754,6 +3841,46 @@ bake_test_case Pipeline_testcases[] = {
     {
         "run_pipeline",
         Pipeline_run_pipeline
+    },
+    {
+        "get_pipeline_from_stage",
+        Pipeline_get_pipeline_from_stage
+    },
+    {
+        "3_systems_3_types",
+        Pipeline_3_systems_3_types
+    },
+    {
+        "random_read_after_random_write_out_in",
+        Pipeline_random_read_after_random_write_out_in
+    },
+    {
+        "random_read_after_random_write_inout_in",
+        Pipeline_random_read_after_random_write_inout_in
+    },
+    {
+        "random_read_after_random_write_out_inout",
+        Pipeline_random_read_after_random_write_out_inout
+    },
+    {
+        "random_read_after_random_write_inout_inout",
+        Pipeline_random_read_after_random_write_inout_inout
+    },
+    {
+        "random_read_after_random_write_w_not_write",
+        Pipeline_random_read_after_random_write_w_not_write
+    },
+    {
+        "random_read_after_random_write_w_not_read",
+        Pipeline_random_read_after_random_write_w_not_read
+    },
+    {
+        "random_read_after_random_write_w_wildcard",
+        Pipeline_random_read_after_random_write_w_wildcard
+    },
+    {
+        "random_in_after_random_inout_after_random_out",
+        Pipeline_random_in_after_random_inout_after_random_out
     }
 };
 
@@ -4087,8 +4214,8 @@ bake_test_case SystemMisc_testcases[] = {
         SystemMisc_rw_out_explicit_from_entity
     },
     {
-        "activate_system_for_table_w_n_traits",
-        SystemMisc_activate_system_for_table_w_n_traits
+        "activate_system_for_table_w_n_pairs",
+        SystemMisc_activate_system_for_table_w_n_pairs
     },
     {
         "get_query",
@@ -4166,6 +4293,30 @@ bake_test_case Sorting_testcases[] = {
         Sorting_sort_1000_entities_2_types
     },
     {
+        "sort_1500_entities_3_types",
+        Sorting_sort_1500_entities_3_types
+    },
+    {
+        "sort_2000_entities_4_types",
+        Sorting_sort_2000_entities_4_types
+    },
+    {
+        "sort_2_entities_2_types",
+        Sorting_sort_2_entities_2_types
+    },
+    {
+        "sort_3_entities_3_types",
+        Sorting_sort_3_entities_3_types
+    },
+    {
+        "sort_3_entities_3_types_2",
+        Sorting_sort_3_entities_3_types_2
+    },
+    {
+        "sort_4_entities_4_types",
+        Sorting_sort_4_entities_4_types
+    },
+    {
         "sort_1000_entities_2_types_again",
         Sorting_sort_1000_entities_2_types_again
     },
@@ -4199,6 +4350,10 @@ bake_test_case Queries_testcases[] = {
     {
         "query_changed_after_set",
         Queries_query_changed_after_set
+    },
+    {
+        "query_change_after_modified",
+        Queries_query_change_after_modified
     },
     {
         "query_change_after_out_system",
@@ -4237,8 +4392,8 @@ bake_test_case Queries_testcases[] = {
         Queries_subquery_rematch_w_sub_optional
     },
     {
-        "query_single_trait",
-        Queries_query_single_trait
+        "query_single_pairs",
+        Queries_query_single_pairs
     },
     {
         "query_single_instanceof",
@@ -4306,106 +4461,106 @@ bake_test_case Queries_testcases[] = {
     }
 };
 
-bake_test_case Traits_testcases[] = {
+bake_test_case Pairs_testcases[] = {
     {
-        "type_w_one_trait",
-        Traits_type_w_one_trait
+        "type_w_one_pair",
+        Pairs_type_w_one_pair
     },
     {
-        "type_w_two_traits",
-        Traits_type_w_two_traits
+        "type_w_two_pairs",
+        Pairs_type_w_two_pairs
     },
     {
-        "add_trait",
-        Traits_add_trait
+        "add_pair",
+        Pairs_add_pair
     },
     {
-        "remove_trait",
-        Traits_remove_trait
+        "remove_pair",
+        Pairs_remove_pair
     },
     {
-        "add_tag_trait_for_tag",
-        Traits_add_tag_trait_for_tag
+        "add_tag_pair_for_tag",
+        Pairs_add_tag_pair_for_tag
     },
     {
-        "add_tag_trait_for_component",
-        Traits_add_tag_trait_for_component
+        "add_tag_pair_for_component",
+        Pairs_add_tag_pair_for_component
     },
     {
-        "query_2_traits",
-        Traits_query_2_traits
+        "query_2_pairs",
+        Pairs_query_2_pairs
     },
     {
-        "query_2_traits_2_instances_per_type",
-        Traits_query_2_traits_2_instances_per_type
+        "query_2_pairs_2_instances_per_type",
+        Pairs_query_2_pairs_2_instances_per_type
     },
     {
-        "query_trait_or_component",
-        Traits_query_trait_or_component
+        "query_pair_or_component",
+        Pairs_query_pair_or_component
     },
     {
-        "query_trait_or_trait",
-        Traits_query_trait_or_trait
+        "query_pair_or_pair",
+        Pairs_query_pair_or_pair
     },
     {
-        "query_not_trait",
-        Traits_query_not_trait
+        "query_not_pair",
+        Pairs_query_not_pair
     },
     {
-        "override_trait",
-        Traits_override_trait
+        "override_pair",
+        Pairs_override_pair
     },
     {
-        "override_tag_trait",
-        Traits_override_tag_trait
+        "override_tag_pair",
+        Pairs_override_tag_pair
     },
     {
-        "trait_w_component_query",
-        Traits_trait_w_component_query
+        "pair_w_component_query",
+        Pairs_pair_w_component_query
     },
     {
-        "trait_wildcard_system",
-        Traits_trait_wildcard_system
+        "pair_wildcard_system",
+        Pairs_pair_wildcard_system
     },
     {
-        "trait_only_wildcard_system",
-        Traits_trait_only_wildcard_system
+        "pair_only_wildcard_system",
+        Pairs_pair_only_wildcard_system
     },
     {
-        "trait_wildcard_on_set",
-        Traits_trait_wildcard_on_set
+        "pair_wildcard_on_set",
+        Pairs_pair_wildcard_on_set
     },
     {
-        "on_add_trait",
-        Traits_on_add_trait
+        "on_add_pair",
+        Pairs_on_add_pair
     },
     {
-        "on_add_trait_tag",
-        Traits_on_add_trait_tag
+        "on_add_pair_tag",
+        Pairs_on_add_pair_tag
     },
     {
-        "on_remove_trait",
-        Traits_on_remove_trait
+        "on_remove_pair",
+        Pairs_on_remove_pair
     },
     {
-        "on_remove_trait_tag",
-        Traits_on_remove_trait_tag
+        "on_remove_pair_tag",
+        Pairs_on_remove_pair_tag
     },
     {
-        "on_remove_trait_on_delete",
-        Traits_on_remove_trait_on_delete
+        "on_remove_pair_on_delete",
+        Pairs_on_remove_pair_on_delete
     },
     {
-        "on_remove_trait_tag_on_delete",
-        Traits_on_remove_trait_tag_on_delete
+        "on_remove_pair_tag_on_delete",
+        Pairs_on_remove_pair_tag_on_delete
     },
     {
-        "trait_from_shared",
-        Traits_trait_from_shared
+        "pair_from_shared",
+        Pairs_pair_from_shared
     },
     {
-        "simple_trait_syntax",
-        Traits_simple_trait_syntax
+        "simple_pair_syntax",
+        Pairs_simple_pair_syntax
     }
 };
 
@@ -5176,6 +5331,14 @@ bake_test_case SystemCascade_testcases[] = {
     {
         "adopt_after_match",
         SystemCascade_adopt_after_match
+    },
+    {
+        "rematch_w_empty_table",
+        SystemCascade_rematch_w_empty_table
+    },
+    {
+        "query_w_only_cascade",
+        SystemCascade_query_w_only_cascade
     }
 };
 
@@ -5471,8 +5634,8 @@ bake_test_case Prefab_testcases[] = {
         Prefab_force_owned_type
     },
     {
-        "force_owned_type_w_trait",
-        Prefab_force_owned_type_w_trait
+        "force_owned_type_w_pair",
+        Prefab_force_owned_type_w_pair
     },
     {
         "prefab_instanceof_hierarchy",
@@ -5513,6 +5676,50 @@ bake_test_case Prefab_testcases[] = {
     {
         "rematch_after_prefab_delete",
         Prefab_rematch_after_prefab_delete
+    },
+    {
+        "add_tag_w_low_id_to_instance",
+        Prefab_add_tag_w_low_id_to_instance
+    },
+    {
+        "get_type_after_base_add",
+        Prefab_get_type_after_base_add
+    },
+    {
+        "get_type_after_recycled_base_add",
+        Prefab_get_type_after_recycled_base_add
+    },
+    {
+        "new_w_recycled_base",
+        Prefab_new_w_recycled_base
+    },
+    {
+        "add_recycled_base",
+        Prefab_add_recycled_base
+    },
+    {
+        "remove_recycled_base",
+        Prefab_remove_recycled_base
+    },
+    {
+        "get_from_recycled_base",
+        Prefab_get_from_recycled_base
+    },
+    {
+        "override_from_recycled_base",
+        Prefab_override_from_recycled_base
+    },
+    {
+        "remove_override_from_recycled_base",
+        Prefab_remove_override_from_recycled_base
+    },
+    {
+        "instantiate_tree_from_recycled_base",
+        Prefab_instantiate_tree_from_recycled_base
+    },
+    {
+        "rematch_after_add_to_recycled_base",
+        Prefab_rematch_after_add_to_recycled_base
     }
 };
 
@@ -5817,52 +6024,48 @@ bake_test_case Type_testcases[] = {
         Type_type_has_prefab
     },
     {
-        "type_has_container",
-        Type_type_has_container
+        "type_has_parent",
+        Type_type_has_parent
     },
     {
-        "type_has_prefab_container",
-        Type_type_has_prefab_container
+        "type_has_pair",
+        Type_type_has_pair
     },
     {
-        "type_has_trait",
-        Type_type_has_trait
+        "type_has_pair_exact",
+        Type_type_has_pair_exact
     },
     {
-        "type_has_trait_exact",
-        Type_type_has_trait_exact
+        "type_has_pair_wildcard",
+        Type_type_has_pair_wildcard
     },
     {
-        "type_has_trait_wildcard",
-        Type_type_has_trait_wildcard
+        "type_has_pair_wildcard_multiple",
+        Type_type_has_pair_wildcard_multiple
     },
     {
-        "type_has_trait_wildcard_multiple",
-        Type_type_has_trait_wildcard_multiple
+        "type_has_pair_wildcard_no_pair",
+        Type_type_has_pair_wildcard_no_pair
     },
     {
-        "type_has_trait_wildcard_no_trait",
-        Type_type_has_trait_wildcard_no_trait
+        "type_owns_pair",
+        Type_type_owns_pair
     },
     {
-        "type_owns_trait",
-        Type_type_owns_trait
+        "type_owns_pair_exact",
+        Type_type_owns_pair_exact
     },
     {
-        "type_owns_trait_exact",
-        Type_type_owns_trait_exact
+        "type_owns_pair_wildcard",
+        Type_type_owns_pair_wildcard
     },
     {
-        "type_owns_trait_wildcard",
-        Type_type_owns_trait_wildcard
+        "type_owns_pair_wildcard_multiple",
+        Type_type_owns_pair_wildcard_multiple
     },
     {
-        "type_owns_trait_wildcard_multiple",
-        Type_type_owns_trait_wildcard_multiple
-    },
-    {
-        "type_owns_trait_wildcard_no_trait",
-        Type_type_owns_trait_wildcard_no_trait
+        "type_owns_pair_wildcard_no_pair",
+        Type_type_owns_pair_wildcard_no_pair
     },
     {
         "type_merge",
@@ -6005,12 +6208,12 @@ bake_test_case Type_testcases[] = {
         Type_type_to_expr_childof
     },
     {
-        "type_to_expr_trait",
-        Type_type_to_expr_trait
+        "type_to_expr_pair",
+        Type_type_to_expr_pair
     },
     {
-        "type_to_expr_trait_w_comp",
-        Type_type_to_expr_trait_w_comp
+        "type_to_expr_pair_w_comp",
+        Type_type_to_expr_pair_w_comp
     },
     {
         "type_to_expr_scope",
@@ -6037,12 +6240,12 @@ bake_test_case Type_testcases[] = {
         Type_type_from_expr_childof
     },
     {
-        "type_from_expr_trait",
-        Type_type_from_expr_trait
+        "type_from_expr_pair",
+        Type_type_from_expr_pair
     },
     {
-        "type_from_expr_trait_w_comp",
-        Type_type_from_expr_trait_w_comp
+        "type_from_expr_pair_w_comp",
+        Type_type_from_expr_pair_w_comp
     },
     {
         "entity_str",
@@ -6061,8 +6264,8 @@ bake_test_case Type_testcases[] = {
         Type_entity_childof_str
     },
     {
-        "entity_trait_str",
-        Type_entity_trait_str
+        "entity_pair_str",
+        Type_entity_pair_str
     },
     {
         "entity_switch_str",
@@ -6101,8 +6304,8 @@ bake_test_case Type_testcases[] = {
         Type_role_instanceof_str
     },
     {
-        "role_trait_str",
-        Type_role_trait_str
+        "role_pair_str",
+        Type_role_pair_str
     },
     {
         "role_switch_str",
@@ -6373,6 +6576,10 @@ bake_test_case MultiThread_testcases[] = {
     {
         "reactive_system",
         MultiThread_reactive_system
+    },
+    {
+        "fini_after_set_threads",
+        MultiThread_fini_after_set_threads
     }
 };
 
@@ -6390,8 +6597,8 @@ bake_test_case DeferredActions_testcases[] = {
         DeferredActions_defer_bulk_new_w_data
     },
     {
-        "defer_bulk_new_w_data_trait",
-        DeferredActions_defer_bulk_new_w_data_trait
+        "defer_bulk_new_w_data_pair",
+        DeferredActions_defer_bulk_new_w_data_pair
     },
     {
         "defer_bulk_new_two",
@@ -6454,8 +6661,8 @@ bake_test_case DeferredActions_testcases[] = {
         DeferredActions_defer_modify
     },
     {
-        "defer_set_trait",
-        DeferredActions_defer_set_trait
+        "defer_set_pair",
+        DeferredActions_defer_set_pair
     },
     {
         "defer_clear",
@@ -6514,8 +6721,8 @@ bake_test_case DeferredActions_testcases[] = {
         DeferredActions_defer_return_value
     },
     {
-        "defer_get_mut_trait",
-        DeferredActions_defer_get_mut_trait
+        "defer_get_mut_pair",
+        DeferredActions_defer_get_mut_pair
     }
 };
 
@@ -7393,6 +7600,13 @@ bake_test_case Error_testcases[] = {
     }
 };
 
+bake_test_case Deprecated_testcases[] = {
+    {
+        "trait_type_str",
+        Deprecated_trait_type_str
+    }
+};
+
 static bake_test_suite suites[] = {
     {
         "Rules",
@@ -7454,7 +7668,7 @@ static bake_test_suite suites[] = {
         "Hierarchies",
         Hierarchies_setup,
         NULL,
-        73,
+        77,
         Hierarchies_testcases
     },
     {
@@ -7510,7 +7724,7 @@ static bake_test_suite suites[] = {
         "Delete",
         Delete_setup,
         NULL,
-        19,
+        26,
         Delete_testcases
     },
     {
@@ -7559,7 +7773,7 @@ static bake_test_suite suites[] = {
         "Pipeline",
         Pipeline_setup,
         NULL,
-        16,
+        26,
         Pipeline_testcases
     },
     {
@@ -7573,22 +7787,22 @@ static bake_test_suite suites[] = {
         "Sorting",
         NULL,
         NULL,
-        20,
+        26,
         Sorting_testcases
     },
     {
         "Queries",
         NULL,
         NULL,
-        31,
+        32,
         Queries_testcases
     },
     {
-        "Traits",
+        "Pairs",
         NULL,
         NULL,
         25,
-        Traits_testcases
+        Pairs_testcases
     },
     {
         "TriggerOnAdd",
@@ -7655,9 +7869,9 @@ static bake_test_suite suites[] = {
     },
     {
         "SystemCascade",
-        SystemCascade_setup,
         NULL,
-        4,
+        NULL,
+        6,
         SystemCascade_testcases
     },
     {
@@ -7678,7 +7892,7 @@ static bake_test_suite suites[] = {
         "Prefab",
         Prefab_setup,
         NULL,
-        75,
+        86,
         Prefab_testcases
     },
     {
@@ -7720,7 +7934,7 @@ static bake_test_suite suites[] = {
         "Type",
         Type_setup,
         NULL,
-        90,
+        89,
         Type_testcases
     },
     {
@@ -7734,7 +7948,7 @@ static bake_test_suite suites[] = {
         "MultiThread",
         MultiThread_setup,
         NULL,
-        34,
+        35,
         MultiThread_testcases
     },
     {
@@ -7813,10 +8027,17 @@ static bake_test_suite suites[] = {
         NULL,
         11,
         Error_testcases
+    },
+    {
+        "Deprecated",
+        NULL,
+        NULL,
+        1,
+        Deprecated_testcases
     }
 };
 
 int main(int argc, char *argv[]) {
     ut_init(argv[0]);
-    return bake_test_run("api", argc, argv, suites, 60);
+    return bake_test_run("api", argc, argv, suites, 61);
 }

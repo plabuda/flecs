@@ -110,6 +110,25 @@ void reset_write_state(
 }
 
 static
+int32_t get_any_write_state(
+    write_state_t *write_state)
+{
+    if (write_state->wildcard) {
+        return WriteToStage;
+    }
+
+    ecs_map_iter_t it = ecs_map_iter(write_state->components);
+    int32_t *elem;
+    while ((elem = ecs_map_next(&it, int32_t, NULL))) {
+        if (*elem == WriteToStage) {
+            return WriteToStage;
+        }
+    }
+
+    return 0;
+}
+
+static
 bool check_column_component(
     ecs_sig_column_t *column,
     bool is_active,
@@ -124,9 +143,7 @@ bool check_column_component(
         switch(column->inout_kind) {
         case EcsInOut:
         case EcsIn:
-            if (state == WriteToStage) {
-                return true;
-            } else if (write_state->wildcard) {
+            if (state == WriteToStage || write_state->wildcard) {
                 return true;
             }
             // fall through
@@ -138,6 +155,24 @@ bool check_column_component(
     } else if (column->from_kind == EcsFromEmpty || 
                column->oper_kind == EcsOperNot) 
     {
+        bool needs_merge = false;
+
+        switch(column->inout_kind) {
+        case EcsIn:
+        case EcsInOut:
+            if (state == WriteToStage) {
+                needs_merge = true;
+            }
+            if (component == EcsWildcard) {
+                if (get_any_write_state(write_state) == WriteToStage) {
+                    needs_merge = true;
+                }
+            }
+            break;
+        default:
+            break;
+        };
+
         switch(column->inout_kind) {
         case EcsInOut:
         case EcsOut:
@@ -147,7 +182,11 @@ bool check_column_component(
             break;
         default:
             break;
-        };
+        };   
+
+        if (needs_merge) {
+            return true;
+        }
     }
 
     return false;
@@ -203,17 +242,17 @@ bool build_pipeline(
     /* Iterate systems in pipeline, add ops for running / merging */
     ecs_iter_t it = ecs_query_iter(query);
     while (ecs_query_next(&it)) {
-        EcsSystem *sys = ecs_column(&it, EcsSystem, 1);        
+        EcsSystem *sys = ecs_term(&it, EcsSystem, 1);
 
         int i;
-        for (i = 0; i < it.count; i ++) {            
+        for (i = 0; i < it.count; i ++) {      
             ecs_query_t *q = sys[i].query;
             if (!q) {
                 continue;
             }
 
             bool needs_merge = false;
-            bool is_active = !ecs_has_entity(
+            bool is_active = !ecs_has_id(
                 world, it.entities[i], EcsInactive);
 
             ecs_vector_each(q->sig.columns, ecs_sig_column_t, column, {
@@ -369,7 +408,7 @@ void ecs_pipeline_run(
     
     ecs_iter_t it = ecs_query_iter(pq->query);
     while (ecs_query_next(&it)) {
-        EcsSystem *sys = ecs_column(&it, EcsSystem, 1);
+        EcsSystem *sys = ecs_term(&it, EcsSystem, 1);
 
         int32_t i;
         for(i = 0; i < it.count; i ++) {
@@ -393,7 +432,7 @@ void ecs_pipeline_run(
                 if (ecs_worker_sync(stage->thread_ctx)) {
                     i = iter_reset(pq, &it, &op, e);
                     op_last = ecs_vector_last(pq->ops, ecs_pipeline_op_t);
-                    sys = ecs_column(&it, EcsSystem, 1);
+                    sys = ecs_term(&it, EcsSystem, 1);
                 }
             }
         }
@@ -452,7 +491,7 @@ void EcsOnAddPipeline(
          * EcsDisabledIntern. Note that EcsDisabled is automatically ignored by
          * the regular query matching */
         ecs_sig_add(world, &sig, EcsFromAny, EcsOperAnd, EcsIn, 
-            ecs_typeid(EcsSystem), 0, NULL, NULL, 0, NULL);
+            ecs_id(EcsSystem), 0, NULL, NULL, 0, NULL);
         ecs_sig_add(world, &sig, EcsFromAny, EcsOperNot, EcsIn, EcsInactive, 0, 
             NULL, NULL, 0, NULL);
         ecs_sig_add(world, &sig, EcsFromAny, EcsOperNot, EcsIn, 
@@ -469,7 +508,7 @@ void EcsOnAddPipeline(
          * a result of another system, and as a result the correct merge 
          * operations need to be put in place. */
         ecs_sig_add(world, &sig, EcsFromAny, EcsOperAnd, EcsIn, 
-            ecs_typeid(EcsSystem), 0, NULL, NULL, 0, NULL);
+            ecs_id(EcsSystem), 0, NULL, NULL, 0, NULL);
         ecs_sig_add(world, &sig, EcsFromAny, EcsOperNot, EcsIn, 
             EcsDisabledIntern, 0, NULL, NULL, 0, NULL);
         add_pipeline_tags_to_sig(world, &sig, type_ptr->normalized);
@@ -539,14 +578,14 @@ void ecs_deactivate_systems(
     ecs_defer_none(world, &world->stage);
 
     while( ecs_query_next(&it)) {
-        EcsSystem *sys = ecs_column(&it, EcsSystem, 1);
+        EcsSystem *sys = ecs_term(&it, EcsSystem, 1);
 
         int32_t i;
         for (i = 0; i < it.count; i ++) {
             ecs_query_t *query = sys[i].query;
             if (query) {
                 if (!ecs_vector_count(query->tables)) {
-                    ecs_add_entity(world, it.entities[i], EcsInactive);
+                    ecs_add_id(world, it.entities[i], EcsInactive);
                 }
             }
         }
@@ -559,6 +598,8 @@ void ecs_set_pipeline(
     ecs_world_t *world,
     ecs_entity_t pipeline)
 {
+    ecs_assert(world != NULL, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(world->magic == ECS_WORLD_MAGIC, ECS_INVALID_PARAMETER, NULL);
     ecs_assert( ecs_get(world, pipeline, EcsPipelineQuery) != NULL, 
         ECS_INVALID_PARAMETER, NULL);
 
@@ -568,6 +609,8 @@ void ecs_set_pipeline(
 ecs_entity_t ecs_get_pipeline(
     const ecs_world_t *world)
 {
+    ecs_assert(world != NULL, ECS_INVALID_PARAMETER, NULL);
+    world = ecs_get_world(world);
     return world->pipeline;
 }
 
@@ -583,7 +626,7 @@ ecs_entity_t ecs_new_pipeline(
     ecs_assert(ecs_get(world, result, EcsType) != NULL, 
         ECS_INTERNAL_ERROR, NULL);
 
-    ecs_add_entity(world, result, EcsPipeline);
+    ecs_add_id(world, result, EcsPipeline);
 
     return result;
 }
@@ -629,7 +672,7 @@ void FlecsPipelineImport(
     ECS_TYPE_IMPL(EcsPipelineQuery);
 
     /* Set ctor and dtor for PipelineQuery */
-    ecs_set(world, ecs_typeid(EcsPipelineQuery), EcsComponentLifecycle, {
+    ecs_set(world, ecs_id(EcsPipelineQuery), EcsComponentLifecycle, {
         .ctor = ecs_ctor(EcsPipelineQuery),
         .dtor = ecs_dtor(EcsPipelineQuery)
     });
