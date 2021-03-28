@@ -8624,6 +8624,7 @@ static const flecs::entity_t Pipeline = EcsPipeline;
 static const flecs::entity_t OnAdd = EcsOnAdd;
 static const flecs::entity_t OnRemove = EcsOnRemove;
 static const flecs::entity_t OnSet = EcsOnSet;
+static const flecs::entity_t UnSet = EcsUnSet;
 
 /* Builtin pipeline tags */
 static const flecs::entity_t PreFrame = EcsPreFrame;
@@ -8638,6 +8639,7 @@ static const flecs::entity_t OnStore = EcsOnStore;
 static const flecs::entity_t PostFrame = EcsPostFrame;
 
 /** Builtin roles */
+static const flecs::entity_t Trait = ECS_PAIR;
 static const flecs::entity_t Pair = ECS_PAIR;
 static const flecs::entity_t Switch = ECS_SWITCH;
 static const flecs::entity_t Case = ECS_CASE;
@@ -8646,7 +8648,7 @@ static const flecs::entity_t Owned = ECS_OWNED;
 /* Builtin entity ids */
 static const flecs::entity_t Flecs = EcsFlecs;
 static const flecs::entity_t FlecsCore = EcsFlecsCore;
-static const flecs::entity_t World = World;
+static const flecs::entity_t World = EcsWorld;
 
 /* Ids used by rule solver */
 static const flecs::entity_t Wildcard = EcsWildcard;
@@ -10692,6 +10694,9 @@ public:
     /* Return id without role */
     flecs::entity remove_role() const;
 
+    /* Return id without role */
+    flecs::entity remove_generation() const;    
+
     /* Test if id has specified role */
     bool has_role(flecs::id_t role) const {
         return ((m_id & ECS_ROLE_MASK) == role);
@@ -10921,13 +10926,19 @@ public:
         return *base();  
     }
 
-    /** Add owned flag for type entity.
-     * This will ensure that all components in the type are owned for instances
-     * of this entity.
-     *
-     * @param type The type for which to add the OWNED flag
-     */    
+    ECS_DEPRECATED("use add_owned(flecs::entity e)")
     base_type& add_owned(const type& type) const;
+
+    /** Set value, add owned flag.
+     *
+     * @tparam T The component to set and for which to add the OWNED flag
+     */    
+    template <typename T>
+    base_type& set_owned(T&& val) const {
+        this->add_owned<T>();
+        this->set<T>(std::forward<T>(val));
+        return *base();  
+    }    
 
     /** Add a switch to an entity by id.
      * The switch entity must be a type, that is it must have the EcsType
@@ -11514,11 +11525,13 @@ public:
     /** Iterate contents (type) of an entity for a specific relationship.
      */
     template <typename Func>
-    void each(flecs::entity_t rel, const Func& func) const {
+    void each(const flecs::entity& rel, const Func& func) const {
         const ecs_vector_t *type = ecs_get_type(m_world, m_id);
         if (!type) {
             return;
         }
+
+        flecs::entity_t rel_id = rel.remove_generation().id();
 
         const ecs_id_t *ids = static_cast<ecs_id_t*>(
             _ecs_vector_first(type, ECS_VECTOR_T(ecs_id_t)));
@@ -11530,7 +11543,7 @@ public:
         int i;
         for (i = 0; i < count; i ++) {
             ecs_id_t id = ids[i];
-            if (ECS_PAIR_RELATION(id) == rel) {
+            if (ECS_PAIR_RELATION(id) == rel_id) {
                 break;
             }
         }
@@ -11538,7 +11551,7 @@ public:
         // Iterate all entries until the relationship stops
         for (; i < count; i ++) {
             ecs_id_t id = ids[i];
-            if (ECS_PAIR_RELATION(id) != rel) {
+            if (ECS_PAIR_RELATION(id) != rel_id) {
                 break;
             }
 
@@ -11546,7 +11559,14 @@ public:
             flecs::entity ent(m_world, id_cl.object());
             func(ent);         
         }
-    }    
+    }
+
+    /** Iterate contents (type) of an entity for a specific relationship.
+     */
+    template <typename Rel, typename Func>
+    void each(const Func& func) const { 
+        return each(_::cpp_type<Rel>::id(m_world), func);
+    }
 
     /** Get component value.
      * 
@@ -14458,6 +14478,11 @@ inline flecs::entity id::remove_role(flecs::id_t role) const {
 /* Return id without role */
 inline flecs::entity id::remove_role() const {
     return flecs::entity(m_world, m_id & ECS_COMPONENT_MASK);
+}
+
+/* Return id without role */
+inline flecs::entity id::remove_generation() const {
+    return flecs::entity(m_world, static_cast<uint32_t>(m_id));
 }
 
 }
