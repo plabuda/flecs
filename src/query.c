@@ -683,18 +683,30 @@ add_trait:
     group_table(world, query, &table_data);
 
     if (column_count) {
-        /* Array that contains the system column to table column mapping */
-        table_data.iter_data.columns = ecs_os_malloc(ECS_SIZEOF(int32_t) * column_count);
-        ecs_assert(table_data.iter_data.columns != NULL, ECS_OUT_OF_MEMORY, NULL);
+        /* Array that contains the query term to table column mapping */
+        table_data.iter_data.columns = ecs_os_malloc(
+            ECS_SIZEOF(int32_t) * column_count);
+        ecs_assert(table_data.iter_data.columns != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
 
-        /* Store the components of the matched table. In the case of OR expressions,
-        * components may differ per matched table. */
-        table_data.iter_data.components = ecs_os_malloc(ECS_SIZEOF(ecs_entity_t) * column_count);
-        ecs_assert(table_data.iter_data.components != NULL, ECS_OUT_OF_MEMORY, NULL);
+        /* Array that contains the entity sources for the different terms */
+        table_data.iter_data.sources = ecs_os_calloc(
+            ECS_SIZEOF(ecs_entity_t) * column_count);
+        ecs_assert(table_data.iter_data.sources != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
+
+        /* Store the components of the matched table. In the case of OR
+         * expressions, components may differ per matched table. */
+        table_data.iter_data.components = ecs_os_malloc(
+            ECS_SIZEOF(ecs_entity_t) * column_count);
+        ecs_assert(table_data.iter_data.components != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
 
         /* Also cache types, so no lookup is needed while iterating */
-        table_data.iter_data.types = ecs_os_malloc(ECS_SIZEOF(ecs_type_t) * column_count);
-        ecs_assert(table_data.iter_data.types != NULL, ECS_OUT_OF_MEMORY, NULL);        
+        table_data.iter_data.types = ecs_os_malloc(
+            ECS_SIZEOF(ecs_type_t) * column_count);
+        ecs_assert(table_data.iter_data.types != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);        
     }
 
     /* Walk columns parsed from the system signature */
@@ -781,7 +793,13 @@ add_trait:
         if ((entity || table_data.iter_data.columns[c] == -1 || from == EcsCascade)) {
             references = add_ref(world, query, table_type, references, 
                 component, entity, from);
-            table_data.iter_data.columns[c] = -ecs_vector_count(references);
+
+            int32_t ref_elem = ecs_vector_count(references);
+            table_data.iter_data.columns[c] = -ref_elem;
+
+            ecs_ref_t *ref = ecs_vector_get(references, ecs_ref_t, ref_elem - 1);
+            ecs_assert(ref != NULL, ECS_INTERNAL_ERROR, NULL);
+            table_data.iter_data.sources[c] = ref->entity;
         }
 
         table_data.iter_data.components[c] = component;
@@ -1885,6 +1903,7 @@ void free_matched_table(
     ecs_os_free(table->iter_data.components);
     ecs_os_free((ecs_vector_t**)table->iter_data.types);
     ecs_os_free(table->iter_data.references);
+    ecs_os_free(table->iter_data.sources);
     ecs_os_free(table->sparse_columns);
     ecs_os_free(table->bitset_columns);
     ecs_os_free(table->monitor);
@@ -1940,11 +1959,13 @@ void resolve_cascade_container(
         /* If container was found, update the reference */
         if (container) {
             references[ref_index].entity = container;
+            table_data->iter_data.sources[column] = container;
             ecs_get_ref_w_id(
                 world, &references[ref_index], container, 
                 ref->component);
         } else {
             references[ref_index].entity = 0;
+            table_data->iter_data.sources[column] = 0;
         }
     }
 }

@@ -14038,6 +14038,16 @@ int32_t* rule_get_columns(
     return &it->columns[op * it->rule->column_count];
 }
 
+/* Get sources array. Sources store, for each matched term in a query, the 
+ * entity id with whicih the term was matched. */
+static
+ecs_entity_t* rule_get_sources(
+    ecs_rule_iter_t *it,
+    int32_t op)    
+{
+    return &it->sources[op * it->rule->column_count];
+}
+
 static
 ecs_table_t* table_from_entity(
     ecs_world_t *world,
@@ -14996,7 +15006,7 @@ void insert_inclusive_set(
     ecs_rule_t *rule,
     ecs_rule_op_kind_t op_kind,
     ecs_rule_var_t *out,
-    ecs_rule_pair_t param,
+    ecs_entity_t pred,
     ecs_rule_var_t *root,
     ecs_entity_t root_entity,
     int32_t c,
@@ -15035,7 +15045,7 @@ void insert_inclusive_set(
      * this operation will fail and return to SetJmp, which will cause it
      * to switch to the *Set operation. */
     store->kind = EcsRuleStore;
-    store->param.pred = param.pred;
+    store->param.pred = pred;
     store->on_pass = next_op;
     store->on_fail = setjmp_lbl;
     store->has_in = true;
@@ -15056,7 +15066,7 @@ void insert_inclusive_set(
 
     /* This is either a SubSet or SuperSet operation */
     set->kind = op_kind;
-    set->param.pred = param.pred;
+    set->param.pred = pred;
     set->on_pass = next_op;
     set->on_fail = prev_op;
     set->has_out = true;
@@ -15090,7 +15100,7 @@ static
 ecs_rule_var_t* store_inclusive_set(
     ecs_rule_t *rule,
     ecs_rule_op_kind_t op_kind,
-    ecs_rule_pair_t param,
+    ecs_entity_t pred,
     ecs_rule_var_t *root,
     ecs_entity_t root_entity,
     int32_t c,
@@ -15131,7 +15141,7 @@ ecs_rule_var_t* store_inclusive_set(
 
     /* Generate the operations */
     insert_inclusive_set(
-        rule, op_kind, av, param, root, root_entity, -1, written);
+        rule, op_kind, av, pred, root, root_entity, -1, written);
 
     /* Make sure to return entity variable, and that it is populated */
     return ensure_entity_written(rule, av, c, written);
@@ -15183,14 +15193,45 @@ void set_output_to_subj(
 static
 void insert_select_or_with(
     ecs_rule_t *rule,
-    ecs_rule_op_t *op,
+    int32_t c,
     ecs_sig_column_t *column,
     ecs_rule_var_t *subj,
+    ecs_rule_pair_t *pair,
     bool *written)
 {
-    ecs_rule_var_t *tvar = NULL, *evar = to_entity(rule, subj);
+    ecs_rule_op_t *op;
+
+    /* Find any entity and/or table variables for subject */
+    ecs_rule_var_t *tvar = NULL, *evar = to_entity(rule, subj), *var = evar;
     if (subj && subj->kind == EcsRuleVarKindTable) {
         tvar = subj;
+        if (!evar) {
+            var = tvar;
+        }
+    }
+
+    if (!var) {
+        evar = subj = store_inclusive_set(
+            rule, EcsRuleSuperSet, EcsIsA, NULL, column->argv[0].entity, -1, 
+            written);
+        tvar = NULL;
+    }
+
+    /* If no pair is provided, create operation from specified column */
+    if (!pair) {
+        op = insert_operation(rule, c, written);
+
+    /* If an explicit pair is provided, override the default one from the 
+     * column. This allows for using a predicate or object variable different
+     * from what is in the column. One application of this is to substitute a
+     * predicate with its subsets, if it is non final */
+    } else {
+        op = insert_operation(rule, -1, written);
+        op->param = *pair;
+
+        /* Assign the column id, so that the operation will still be correctly
+         * associated with the correct expression column. */
+        op->column = c;
     }
 
     /* If entity variable is known and resolved, create with for it */
@@ -15246,14 +15287,10 @@ void insert_nonfinal_select_or_with(
         subj_id = subj->id;
     }
 
-    /* If predicate is not final, evaluate with all subsets of predicate.
+    /* If predicate is not final, evaluate with all IsA subsets of predicate.
      * Create a param with only the predicate set. */
-    ecs_rule_pair_t pred_param;
-    pred_param.pred = EcsIsA;
-    pred_param.obj = param.pred;
-    pred_param.reg_mask = 0;
     ecs_rule_var_t *pred_subsets = store_inclusive_set(
-        rule, EcsRuleSubSet, pred_param, NULL, param.pred, c, written);
+        rule, EcsRuleSubSet, EcsIsA, NULL, param.pred, c, written);
     
     /* Refetch subject variable, as variable array may have reallocated */
     if (subj) {
@@ -15264,20 +15301,16 @@ void insert_nonfinal_select_or_with(
     if (param.reg_mask & RULE_PAIR_OBJECT) {
         ecs_rule_var_t *obj = &rule->variables[param.obj];
         obj = get_most_specific_var(rule, obj, written);
-    }    
-
-    ecs_rule_op_t *op = insert_operation(rule, -1, written);
+    }
 
     /* Use subset variable for predicate */
-    op->param.pred = pred_subsets->id;
-    op->param.obj = param.obj;
-    op->param.reg_mask = param.reg_mask | RULE_PAIR_PREDICATE;
+    ecs_rule_pair_t pair;
+    pair.pred = pred_subsets->id;
+    pair.obj = param.obj;
+    pair.reg_mask = param.reg_mask | RULE_PAIR_PREDICATE;
+    pair.transitive = false;
 
-    /* Associate last operation with column to ensure that the resolved
-     * component id gets written. */
-    op->column = c;
-
-    insert_select_or_with(rule, op, column, subj, written);
+    insert_select_or_with(rule, c, column, subj, &pair, written);
 }
 
 static
@@ -15306,8 +15339,7 @@ void insert_term_2(
     subj = get_most_specific_var(rule, subj, written);
 
     if (pred || (param.final && !param.transitive)) {
-        ecs_rule_op_t *op = insert_operation(rule, c, written);
-        insert_select_or_with(rule, op, column, subj, written);
+        insert_select_or_with(rule, c, column, subj, NULL, written);
 
     } else if (!param.final) {
         insert_nonfinal_select_or_with(rule, column, param, subj, c, written);
@@ -15315,7 +15347,7 @@ void insert_term_2(
         if (is_known(rule, subj, written)) {
             if (is_known(rule, obj, written)) {
                 ecs_rule_var_t *obj_subsets = store_inclusive_set(
-                    rule, EcsRuleSubSet, param, obj, 
+                    rule, EcsRuleSubSet, param.pred, obj, 
                     column->argv[1].entity, c, written);
 
                 if (subj) {
@@ -15340,7 +15372,7 @@ void insert_term_2(
                 obj = to_entity(rule, obj);
 
                 insert_inclusive_set(
-                    rule, EcsRuleSuperSet, obj, param, subj, 
+                    rule, EcsRuleSuperSet, obj, param.pred, subj, 
                     column->argv[0].entity, c, written);
             }
         } else {
@@ -15354,7 +15386,7 @@ void insert_term_2(
                 obj = get_most_specific_var(rule, obj, written);
 
                 insert_inclusive_set(
-                    rule, EcsRuleSubSet, subj, param, obj, 
+                    rule, EcsRuleSubSet, subj, param.pred, obj, 
                     column->argv[1].entity, c, written);
             } else {
                 ecs_assert(obj != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -15392,7 +15424,7 @@ void insert_term_2(
 
                 /* Insert superset instruction to find all supersets */
                 insert_inclusive_set(
-                    rule, EcsRuleSuperSet, obj, op->param, av,
+                    rule, EcsRuleSuperSet, obj, op->param.pred, av,
                     0, c, written);
 
             }
@@ -15415,8 +15447,7 @@ void insert_term_1(
     subj = get_most_specific_var(rule, subj, written);
 
     if (pred || param.final) {
-        ecs_rule_op_t *op = insert_operation(rule, c, written);
-        insert_select_or_with(rule, op, column, subj, written);      
+        insert_select_or_with(rule, c, column, subj, NULL, written);      
     } else {
         insert_nonfinal_select_or_with(rule, column, param, subj, c, written);
     }
@@ -15797,6 +15828,9 @@ ecs_iter_t ecs_rule_iter(
         if (rule->column_count) {
             it->columns = ecs_os_malloc(rule->operation_count * 
                 rule->column_count * ECS_SIZEOF(int32_t));
+
+            it->sources = ecs_os_calloc(rule->operation_count *
+                rule->column_count * ECS_SIZEOF(ecs_entity_t));
         }
     }
 
@@ -15816,6 +15850,8 @@ ecs_iter_t ecs_rule_iter(
     if (result.column_count) {
         it->table.components = ecs_os_malloc(
             result.column_count * ECS_SIZEOF(ecs_entity_t));
+        it->table.sources = ecs_os_malloc(
+            result.column_count * ECS_SIZEOF(ecs_entity_t));            
     }
 
     return result;
@@ -15827,6 +15863,7 @@ void ecs_rule_iter_free(
     ecs_rule_iter_t *it = &iter->iter.rule;
     ecs_os_free(it->registers);
     ecs_os_free(it->columns);
+    ecs_os_free(it->sources);
     ecs_os_free(it->op_ctx);
     ecs_os_free(it->table.components);
     it->registers = NULL;
@@ -15961,6 +15998,27 @@ ecs_entity_t set_column(
         return it->table.components[op->column] = rule_get_column(type, column);
     } else {
         return it->table.components[op->column] = 0;
+    }
+}
+
+static
+ecs_entity_t set_source(
+    ecs_rule_iter_t *it,
+    ecs_rule_op_t *op,
+    ecs_rule_reg_t *regs,
+    int32_t r,
+    int32_t column)
+{
+    if (op->column == -1) {
+        return -1;
+    }
+
+    const ecs_rule_t *rule = it->rule;
+
+    if (rule->variables[r].kind == EcsRuleVarKindEntity) {
+        return it->table.sources[op->column] = reg_get_entity(rule, op, regs, r);
+    } else {
+        return it->table.sources[op->column] = 0;
     }
 }
 
@@ -16524,6 +16582,7 @@ bool eval_with(
     }
 
     set_column(it, op, table->type, column);
+    set_source(it, op, regs, r, column);
 
     return true;
 }
@@ -16762,6 +16821,27 @@ void push_columns(
     memcpy(dst_cols, src_cols, ECS_SIZEOF(int32_t) * it->rule->column_count);
 }
 
+/* Utility to copy all sources to the next frame. Sources keep track of which
+ * entity (subject) was found for the term. The columns array is important, as 
+ * it is used to determine whether a component is owned, shared, or from another
+ * source altogether (like the system or parent). */
+static
+void push_sources(
+    ecs_rule_iter_t *it,
+    int32_t cur,
+    int32_t next)
+{
+    if (!it->rule->column_count) {
+        return;
+    }
+
+    ecs_entity_t *src_sources = rule_get_sources(it, cur);
+    ecs_entity_t *dst_sources = rule_get_sources(it, next);
+
+    memcpy(dst_sources, src_sources, 
+        ECS_SIZEOF(int32_t) * it->rule->column_count);
+}
+
 /* Set iterator data from table */
 static
 void set_iter_table(
@@ -16910,6 +16990,7 @@ bool ecs_rule_next(
         if (!redo && op_index && !is_control_flow(op)) {
             push_registers(it, last_index, op_index);
             push_columns(it, last_index, op_index);
+            push_sources(it, last_index, op_index);
             it->op_ctx[op_index].last_op = last_index;
         }
 
@@ -20323,18 +20404,30 @@ add_trait:
     group_table(world, query, &table_data);
 
     if (column_count) {
-        /* Array that contains the system column to table column mapping */
-        table_data.iter_data.columns = ecs_os_malloc(ECS_SIZEOF(int32_t) * column_count);
-        ecs_assert(table_data.iter_data.columns != NULL, ECS_OUT_OF_MEMORY, NULL);
+        /* Array that contains the query term to table column mapping */
+        table_data.iter_data.columns = ecs_os_malloc(
+            ECS_SIZEOF(int32_t) * column_count);
+        ecs_assert(table_data.iter_data.columns != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
 
-        /* Store the components of the matched table. In the case of OR expressions,
-        * components may differ per matched table. */
-        table_data.iter_data.components = ecs_os_malloc(ECS_SIZEOF(ecs_entity_t) * column_count);
-        ecs_assert(table_data.iter_data.components != NULL, ECS_OUT_OF_MEMORY, NULL);
+        /* Array that contains the entity sources for the different terms */
+        table_data.iter_data.sources = ecs_os_calloc(
+            ECS_SIZEOF(ecs_entity_t) * column_count);
+        ecs_assert(table_data.iter_data.sources != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
+
+        /* Store the components of the matched table. In the case of OR
+         * expressions, components may differ per matched table. */
+        table_data.iter_data.components = ecs_os_malloc(
+            ECS_SIZEOF(ecs_entity_t) * column_count);
+        ecs_assert(table_data.iter_data.components != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);
 
         /* Also cache types, so no lookup is needed while iterating */
-        table_data.iter_data.types = ecs_os_malloc(ECS_SIZEOF(ecs_type_t) * column_count);
-        ecs_assert(table_data.iter_data.types != NULL, ECS_OUT_OF_MEMORY, NULL);        
+        table_data.iter_data.types = ecs_os_malloc(
+            ECS_SIZEOF(ecs_type_t) * column_count);
+        ecs_assert(table_data.iter_data.types != NULL, 
+            ECS_OUT_OF_MEMORY, NULL);        
     }
 
     /* Walk columns parsed from the system signature */
@@ -20421,7 +20514,13 @@ add_trait:
         if ((entity || table_data.iter_data.columns[c] == -1 || from == EcsCascade)) {
             references = add_ref(world, query, table_type, references, 
                 component, entity, from);
-            table_data.iter_data.columns[c] = -ecs_vector_count(references);
+
+            int32_t ref_elem = ecs_vector_count(references);
+            table_data.iter_data.columns[c] = -ref_elem;
+
+            ecs_ref_t *ref = ecs_vector_get(references, ecs_ref_t, ref_elem - 1);
+            ecs_assert(ref != NULL, ECS_INTERNAL_ERROR, NULL);
+            table_data.iter_data.sources[c] = ref->entity;
         }
 
         table_data.iter_data.components[c] = component;
@@ -21525,6 +21624,7 @@ void free_matched_table(
     ecs_os_free(table->iter_data.components);
     ecs_os_free((ecs_vector_t**)table->iter_data.types);
     ecs_os_free(table->iter_data.references);
+    ecs_os_free(table->iter_data.sources);
     ecs_os_free(table->sparse_columns);
     ecs_os_free(table->bitset_columns);
     ecs_os_free(table->monitor);
@@ -21580,11 +21680,13 @@ void resolve_cascade_container(
         /* If container was found, update the reference */
         if (container) {
             references[ref_index].entity = container;
+            table_data->iter_data.sources[column] = container;
             ecs_get_ref_w_id(
                 world, &references[ref_index], container, 
                 ref->component);
         } else {
             references[ref_index].entity = 0;
+            table_data->iter_data.sources[column] = 0;
         }
     }
 }
@@ -24357,17 +24459,12 @@ ecs_entity_t ecs_term_source(
     ecs_assert(index <= it->column_count, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(index > 0, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(it->table != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_assert(it->table->columns != NULL, ECS_INTERNAL_ERROR, NULL);
-
-    ecs_iter_table_t *table = it->table;
-    int32_t table_column = table->columns[index - 1];
-    if (table_column >= 0) {
+    
+    if (!it->table->sources) {
         return 0;
+    } else {
+        return it->table->sources[index - 1];
     }
-
-    ecs_assert(table->references != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_ref_t *ref = &table->references[-table_column - 1];
-    return ref->entity;
 }
 
 ecs_id_t ecs_term_id(

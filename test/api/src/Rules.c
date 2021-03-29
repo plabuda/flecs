@@ -2033,3 +2033,142 @@ void Rules_transitive_fact_subset_superset() {
 
     ecs_fini(world);
 }
+
+void Rules_implicit_is_a_tag_fact() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Painting(PaintingTmpl)\n"
+        "IsA(PaintingTmpl, Painting)\n"
+        "IsA(MonaLisa, PaintingTmpl)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "Painting(MonaLisa)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
+
+}
+
+void Rules_implicit_is_a_tag_fact_2_lvls() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Painting(PaintingTmpl)\n"
+        "IsA(PaintingTmpl, Painting)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(MonaLisa, PaintingTmpl_2)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "Painting(MonaLisa)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_tag_fact_3_lvls() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Painting(PaintingTmpl)\n"
+        "IsA(PaintingTmpl, Painting)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(PaintingTmpl_3, PaintingTmpl_2)\n"
+        "IsA(MonaLisa, PaintingTmpl_3)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "Painting(MonaLisa)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_tag_fact_2_lvls_both_matching() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Painting(PaintingTmpl)\n"
+        "Painting(PaintingTmpl_2)\n"
+        "IsA(PaintingTmpl, Painting)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(MonaLisa, PaintingTmpl_2)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "Painting(MonaLisa)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "PaintingTmpl_2");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_tag_fact_2_lvls_entity_matching() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Painting(PaintingTmpl)\n"
+        "Painting(MonaLisa)\n"
+        "IsA(MonaLisa, PaintingTmpl)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "Painting(MonaLisa)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "MonaLisa");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_pair_fact() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_transitive_pair_fact() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_transitive_is_a_pair_fact() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_tag_var() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_pair_var() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_transitive_pair_var() {
+    // Implement testcase
+}
+
+void Rules_implicit_is_a_transitive_is_a_pair_var() {
+    // Implement testcase
+}

@@ -61,6 +61,18 @@ void Rules_transitive_fact_subset_superset(void);
 void Rules_transitive_all(void);
 void Rules_same_pred_obj(void);
 void Rules_same_pred_obj_explicit_subject(void);
+void Rules_implicit_is_a_tag_fact(void);
+void Rules_implicit_is_a_tag_fact_2_lvls(void);
+void Rules_implicit_is_a_tag_fact_3_lvls(void);
+void Rules_implicit_is_a_tag_fact_2_lvls_both_matching(void);
+void Rules_implicit_is_a_tag_fact_2_lvls_entity_matching(void);
+void Rules_implicit_is_a_pair_fact(void);
+void Rules_implicit_is_a_transitive_pair_fact(void);
+void Rules_implicit_is_a_transitive_is_a_pair_fact(void);
+void Rules_implicit_is_a_tag_var(void);
+void Rules_implicit_is_a_pair_var(void);
+void Rules_implicit_is_a_transitive_pair_var(void);
+void Rules_implicit_is_a_transitive_is_a_pair_var(void);
 
 // Testsuite 'New'
 void New_setup(void);
@@ -1820,6 +1832,54 @@ bake_test_case Rules_testcases[] = {
     {
         "same_pred_obj_explicit_subject",
         Rules_same_pred_obj_explicit_subject
+    },
+    {
+        "implicit_is_a_tag_fact",
+        Rules_implicit_is_a_tag_fact
+    },
+    {
+        "implicit_is_a_tag_fact_2_lvls",
+        Rules_implicit_is_a_tag_fact_2_lvls
+    },
+    {
+        "implicit_is_a_tag_fact_3_lvls",
+        Rules_implicit_is_a_tag_fact_3_lvls
+    },
+    {
+        "implicit_is_a_tag_fact_2_lvls_both_matching",
+        Rules_implicit_is_a_tag_fact_2_lvls_both_matching
+    },
+    {
+        "implicit_is_a_tag_fact_2_lvls_entity_matching",
+        Rules_implicit_is_a_tag_fact_2_lvls_entity_matching
+    },
+    {
+        "implicit_is_a_pair_fact",
+        Rules_implicit_is_a_pair_fact
+    },
+    {
+        "implicit_is_a_transitive_pair_fact",
+        Rules_implicit_is_a_transitive_pair_fact
+    },
+    {
+        "implicit_is_a_transitive_is_a_pair_fact",
+        Rules_implicit_is_a_transitive_is_a_pair_fact
+    },
+    {
+        "implicit_is_a_tag_var",
+        Rules_implicit_is_a_tag_var
+    },
+    {
+        "implicit_is_a_pair_var",
+        Rules_implicit_is_a_pair_var
+    },
+    {
+        "implicit_is_a_transitive_pair_var",
+        Rules_implicit_is_a_transitive_pair_var
+    },
+    {
+        "implicit_is_a_transitive_is_a_pair_var",
+        Rules_implicit_is_a_transitive_is_a_pair_var
     }
 };
 
@@ -7632,7 +7692,7 @@ static bake_test_suite suites[] = {
         "Rules",
         NULL,
         NULL,
-        52,
+        64,
         Rules_testcases
     },
     {

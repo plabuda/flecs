@@ -82,6 +82,7 @@ typedef struct ecs_iter_table_t {
     ecs_entity_t *components; /**< Components in current table */
     ecs_type_t *types;        /**< Components in current table */
     ecs_ref_t *references;    /**< References to entities (from query) */
+    ecs_entity_t *sources;    /**< Source identifiers */
 } ecs_iter_table_t;
 
 /** Scope-iterator specific data */
@@ -106,6 +107,7 @@ typedef struct ecs_rule_iter_t {
     struct ecs_rule_reg_t *registers;    /**< Variable storage */
     struct ecs_rule_op_ctx_t *op_ctx;    /**< Operation-specific state */
     int32_t *columns;                    /**< Table column indices */
+    ecs_entity_t *sources;               /**< Term sources */
     
     ecs_iter_table_t table;              /**< Result in case of table */
     ecs_entity_t entity;                 /**< Result in case of 1 entity */
@@ -156,7 +158,7 @@ struct ecs_iter_t {
     ecs_query_t *query;           /**< Current query being evaluated */
     int32_t table_count;          /**< Active table count for query */
     int32_t inactive_table_count; /**< Inactive table count for query */
-    int32_t column_count;         /**< Number of columns for system */
+    int32_t column_count;         /**< Number of columns for query */
 
     void *table_columns;          /**< Table component data */
     ecs_entity_t *entities;       /**< Entity identifiers */

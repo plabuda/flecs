@@ -66,7 +66,20 @@
                 "transitive_fact_subset_superset",
                 "transitive_all",
                 "same_pred_obj",
-                "same_pred_obj_explicit_subject"
+                "same_pred_obj_explicit_subject",
+                "implicit_is_a_tag_fact",
+                "implicit_is_a_tag_fact_2_lvls",
+                "implicit_is_a_tag_fact_3_lvls",
+                "implicit_is_a_tag_fact_2_lvls_both_matching",
+                "implicit_is_a_tag_fact_2_lvls_entity_matching",
+                "implicit_is_a_pair_fact",
+                "implicit_is_a_transitive_pair_fact",
+                "implicit_is_a_transitive_is_a_pair_fact",
+                "implicit_is_a_tag_var",
+                "implicit_is_a_pair_var",
+                "implicit_is_a_transitive_pair_var",
+                "implicit_is_a_transitive_is_a_pair_var"
+
             ]
         }, {
             "id": "New",
