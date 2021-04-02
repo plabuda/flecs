@@ -2034,6 +2034,57 @@ void Rules_transitive_fact_subset_superset() {
     ecs_fini(world);
 }
 
+void Rules_transitive_nonfinal_fact() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Transitive(PartOf)\n"
+        "PartOf(ArtCollection, Museum)\n"
+        "PartOf(Painting, ArtCollection)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "PartOf(Painting, Museum)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,ArtCollection)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,Painting)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_transitive_nonfinal_fact_w_implicit_pred_subset() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Transitive(ConnectedWith)\n"
+        "IsA(PartOf, ConnectedWith)\n"
+        "PartOf(ArtCollection, Museum)\n"
+        "PartOf(Painting, ArtCollection)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "ConnectedWith(Painting, Museum)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,ArtCollection)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,Painting)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
 void Rules_implicit_is_a_tag_fact() {
     ecs_world_t *world = ecs_init();
 
@@ -2146,29 +2197,242 @@ void Rules_implicit_is_a_tag_fact_2_lvls_entity_matching() {
 }
 
 void Rules_implicit_is_a_pair_fact() {
-    // Implement testcase
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl, Painter)\n"
+        "IsA(MonaLisa, PaintingTmpl)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "CreatedBy(MonaLisa, Painter)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
-void Rules_implicit_is_a_transitive_pair_fact() {
-    // Implement testcase
+void Rules_implicit_is_a_pair_2_lvls() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl, Painter)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(MonaLisa, PaintingTmpl_2)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "CreatedBy(MonaLisa, Painter)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
-void Rules_implicit_is_a_transitive_is_a_pair_fact() {
-    // Implement testcase
+void Rules_implicit_is_a_pair_3_lvls() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl, Painter)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(PaintingTmpl_3, PaintingTmpl_2)\n"
+        "IsA(MonaLisa, PaintingTmpl_3)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "CreatedBy(MonaLisa, Painter)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
-void Rules_implicit_is_a_tag_var() {
-    // Implement testcase
+void Rules_implicit_is_a_pair_2_lvls_both_matching() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl, Painter)\n"
+        "CreatedBy(PaintingTmpl_2, Painter)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(MonaLisa, PaintingTmpl_2)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "CreatedBy(MonaLisa, Painter)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "PaintingTmpl_2");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_pair_2_lvls_entity_matching() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl, Painter)\n"
+        "CreatedBy(MonaLisa, Painter)\n"
+        "IsA(PaintingTmpl_2, PaintingTmpl)\n"
+        "IsA(MonaLisa, PaintingTmpl_2)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "CreatedBy(MonaLisa, Painter)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "MonaLisa");
+
+    test_assert(ecs_rule_next(&it) == false);
+}
+
+void Rules_implicit_is_a_pred_var() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Canvas(PaintingTmpl)\n"
+        "Painting(MonaLisa)\n"
+        "IsA(MonaLisa, PaintingTmpl)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "X(MonaLisa)");
+    test_assert(r != NULL);
+
+    int32_t x_var = ecs_rule_find_variable(r, "X");
+    test_assert(x_var != -1);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Name");
+    test_column_source(&it, 1, "MonaLisa");
+    test_var(&it, x_var, "Name");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Painting");
+    test_column_source(&it, 1, "MonaLisa");
+    test_var(&it, x_var, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Name");
+    test_column_source(&it, 1, "PaintingTmpl");
+    test_var(&it, x_var, "Name");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "Canvas");
+    test_column_source(&it, 1, "PaintingTmpl");
+    test_var(&it, x_var, "Canvas");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
 void Rules_implicit_is_a_pair_var() {
-    // Implement testcase
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "CreatedBy(PaintingTmpl,Painter)\n"
+        "PaintedBy(MonaLisa,LeonardoDaVinci)\n"
+        "IsA(MonaLisa, PaintingTmpl)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "X(MonaLisa, Y)");
+    test_assert(r != NULL);
+
+    int32_t x_var = ecs_rule_find_variable(r, "X");
+    test_assert(x_var != -1);
+
+    int32_t y_var = ecs_rule_find_variable(r, "Y");
+    test_assert(y_var != -1);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(IsA,PaintingTmpl)");
+    test_column_source(&it, 1, "MonaLisa");
+    test_var(&it, x_var, "IsA");
+    test_var(&it, y_var, "PaintingTmpl");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PaintedBy,LeonardoDaVinci)");
+    test_column_source(&it, 1, "MonaLisa");
+    test_var(&it, x_var, "PaintedBy");
+    test_var(&it, y_var, "LeonardoDaVinci");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(CreatedBy,Painter)");
+    test_column_source(&it, 1, "PaintingTmpl");
+    test_var(&it, x_var, "CreatedBy");
+    test_var(&it, y_var, "Painter");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
-void Rules_implicit_is_a_transitive_pair_var() {
-    // Implement testcase
+void Rules_implicit_is_a_transitive_pair_fact() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Transitive(PartOf)\n"
+        "PartOf(ArtCollection, Museum)\n"
+        "PartOf(Painting, ArtCollection)\n"
+        "IsA(MonaLisa, Painting)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "PartOf(MonaLisa, Museum)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,ArtCollection)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,Painting)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == false);
 }
 
-void Rules_implicit_is_a_transitive_is_a_pair_var() {
-    // Implement testcase
+void Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_subset() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Transitive(ConnectedWith)\n"
+        "IsA(PartOf, ConnectedWith)\n"
+        "PartOf(ArtCollection, Museum)\n"
+        "PartOf(Painting, ArtCollection)\n"
+        "IsA(MonaLisa, Painting)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "ConnectedWith(MonaLisa, Museum)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,ArtCollection)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,Painting)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == false);
 }

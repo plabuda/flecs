@@ -107,7 +107,6 @@
                 "each_pair_w_childof",
                 "each_pair_w_recycled_rel",
                 "each_pair_w_recycled_obj"
-
             ]
         }, {
             "id": "Switch",
