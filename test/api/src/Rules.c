@@ -2436,3 +2436,32 @@ void Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_subset() {
 
     test_assert(ecs_rule_next(&it) == false);
 }
+
+void Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_obj() {
+    ecs_world_t *world = ecs_init();
+
+    const char *small_rules = 
+        "Transitive(PartOf)\n"
+        "PartOf(LouvreExhibit, Louvre)\n"
+        "PartOf(LouvrePainting, LouvreExhibit)\n"
+        "IsA(Louvre, Museum)\n"
+        "IsA(MonaLisa, LouvrePainting)\n";
+
+    test_assert(ecs_plecs_from_str(world, NULL, small_rules) == 0);
+
+    ecs_rule_t *r = ecs_rule_new(world, "PartOf(MonaLisa, Museum)");
+    test_assert(r != NULL);
+
+    printf("%s\n", ecs_rule_str(r));
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,ArtCollection)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == true);
+    test_column_entity(&it, 1, "(PartOf,Painting)");
+    test_column_source(&it, 1, "Painting");
+
+    test_assert(ecs_rule_next(&it) == false);
+}

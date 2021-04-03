@@ -82,7 +82,8 @@
                 "implicit_is_a_pred_var",
                 "implicit_is_a_pair_var",
                 "implicit_is_a_transitive_pair_fact",
-                "implicit_is_a_transitive_pair_fact_w_implicit_pred_subset"
+                "implicit_is_a_transitive_pair_fact_w_implicit_pred_subset",
+                "implicit_is_a_transitive_pair_fact_w_implicit_pred_obj"
             ]
         }, {
             "id": "New",

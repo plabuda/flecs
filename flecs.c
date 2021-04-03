@@ -16306,6 +16306,11 @@ bool eval_subset(
     ecs_sparse_t *table_set;
     ecs_table_t *table = NULL;
 
+    printf("eval subset\n");
+    char buff[256];
+    ecs_entity_str(world, filter.mask, buff, 256);
+    printf(" -> filter = %s\n", buff);    
+
     if (!redo) {
         op_ctx->stack = op_ctx->storage;
         sp = op_ctx->sp = 0;
@@ -16554,6 +16559,8 @@ bool eval_with(
     ecs_table_record_t *table_record = NULL;
     ecs_rule_reg_t *regs = get_registers(it, op);
 
+    printf("eval_with\n");
+
     /* Get register indices for input */
     int32_t r = op->r_in;
 
@@ -16566,6 +16573,10 @@ bool eval_with(
     if (redo && !filter.wildcard) {
         return false;
     }
+
+    char buff[256];
+    ecs_entity_str(world, filter.mask, buff, 256);
+    printf(" -> filter = %s\n", buff);
 
     int32_t column = -1;
     ecs_table_t *table = NULL;
@@ -16644,6 +16655,8 @@ bool eval_with(
             return false;
         }
 
+        printf(" -> table = [%s]\n", ecs_type_str(world, table->type));
+
         /* Try to find the table in the table set by the table id. If the table
          * cannot be found in the table set, the table does not have the
          * required expression. This is a much faster way to do this check than
@@ -16666,6 +16679,8 @@ bool eval_with(
     /* If this is a redo, progress to the next match */
     } else {
         table = reg_get_table(rule, op, regs, r);
+
+        printf(" -> table = [%s]\n", ecs_type_str(world, table->type));
         
         /* First test if there are any more matches for the current table, in 
          * case we're looking for a wildcard. */
@@ -16775,6 +16790,8 @@ bool eval_each(
 
     /* Assign entity */
     entity_reg_set(it->rule, regs, r_out, e);
+
+    printf(" -> yield each = %s\n", ecs_get_name(it->rule->world, e));    
 
     return true;
 }

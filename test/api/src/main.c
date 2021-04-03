@@ -77,6 +77,7 @@ void Rules_implicit_is_a_pred_var(void);
 void Rules_implicit_is_a_pair_var(void);
 void Rules_implicit_is_a_transitive_pair_fact(void);
 void Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_subset(void);
+void Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_obj(void);
 
 // Testsuite 'New'
 void New_setup(void);
@@ -1900,6 +1901,10 @@ bake_test_case Rules_testcases[] = {
     {
         "implicit_is_a_transitive_pair_fact_w_implicit_pred_subset",
         Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_subset
+    },
+    {
+        "implicit_is_a_transitive_pair_fact_w_implicit_pred_obj",
+        Rules_implicit_is_a_transitive_pair_fact_w_implicit_pred_obj
     }
 };
 
@@ -7712,7 +7717,7 @@ static bake_test_suite suites[] = {
         "Rules",
         NULL,
         NULL,
-        68,
+        69,
         Rules_testcases
     },
     {
