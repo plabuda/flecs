@@ -328,6 +328,8 @@ void Hierarchies_add_path_depth_2(void);
 void Hierarchies_add_path_existing_depth_0(void);
 void Hierarchies_add_path_existing_depth_1(void);
 void Hierarchies_add_path_existing_depth_2(void);
+void Hierarchies_add_path_from_scope(void);
+void Hierarchies_add_path_from_scope_new_entity(void);
 void Hierarchies_new_w_child_in_root(void);
 void Hierarchies_delete_child(void);
 void Hierarchies_delete_2_children(void);
@@ -603,6 +605,7 @@ void ComponentLifecycle_prevent_lifecycle_overwrite(void);
 void ComponentLifecycle_prevent_lifecycle_overwrite_null_callbacks(void);
 void ComponentLifecycle_allow_lifecycle_overwrite_equal_callbacks(void);
 void ComponentLifecycle_set_lifecycle_after_trigger(void);
+void ComponentLifecycle_valid_entity_in_dtor_after_delete(void);
 
 // Testsuite 'Pipeline'
 void Pipeline_setup(void);
@@ -781,6 +784,10 @@ void Queries_orphaned_query(void);
 void Queries_nested_orphaned_query(void);
 void Queries_invalid_access_orphaned_query(void);
 void Queries_stresstest_query_free(void);
+void Queries_only_from_entity(void);
+void Queries_only_from_singleton(void);
+void Queries_only_not_from_entity(void);
+void Queries_only_not_from_singleton(void);
 
 // Testsuite 'Pairs'
 void Pairs_type_w_one_pair(void);
@@ -851,6 +858,7 @@ void TriggerOnRemove_delete_match_1_of_2(void);
 void TriggerOnRemove_delete_no_match_1(void);
 void TriggerOnRemove_remove_watched(void);
 void TriggerOnRemove_delete_watched(void);
+void TriggerOnRemove_valid_entity_after_delete(void);
 
 // Testsuite 'TriggerOnSet'
 void TriggerOnSet_set(void);
@@ -1026,6 +1034,7 @@ void SystemManual_setup(void);
 void SystemManual_1_type_1_component(void);
 void SystemManual_activate_status(void);
 void SystemManual_no_automerge(void);
+void SystemManual_dont_run_w_unmatching_entity_query(void);
 
 // Testsuite 'Tasks'
 void Tasks_no_components(void);
@@ -2855,6 +2864,14 @@ bake_test_case Hierarchies_testcases[] = {
         Hierarchies_add_path_existing_depth_2
     },
     {
+        "add_path_from_scope",
+        Hierarchies_add_path_from_scope
+    },
+    {
+        "add_path_from_scope_new_entity",
+        Hierarchies_add_path_from_scope_new_entity
+    },
+    {
         "new_w_child_in_root",
         Hierarchies_new_w_child_in_root
     },
@@ -3863,6 +3880,10 @@ bake_test_case ComponentLifecycle_testcases[] = {
     {
         "set_lifecycle_after_trigger",
         ComponentLifecycle_set_lifecycle_after_trigger
+    },
+    {
+        "valid_entity_in_dtor_after_delete",
+        ComponentLifecycle_valid_entity_in_dtor_after_delete
     }
 };
 
@@ -4547,6 +4568,22 @@ bake_test_case Queries_testcases[] = {
     {
         "stresstest_query_free",
         Queries_stresstest_query_free
+    },
+    {
+        "only_from_entity",
+        Queries_only_from_entity
+    },
+    {
+        "only_from_singleton",
+        Queries_only_from_singleton
+    },
+    {
+        "only_not_from_entity",
+        Queries_only_not_from_entity
+    },
+    {
+        "only_not_from_singleton",
+        Queries_only_not_from_singleton
     }
 };
 
@@ -4808,6 +4845,10 @@ bake_test_case TriggerOnRemove_testcases[] = {
     {
         "delete_watched",
         TriggerOnRemove_delete_watched
+    },
+    {
+        "valid_entity_after_delete",
+        TriggerOnRemove_valid_entity_after_delete
     }
 };
 
@@ -5459,6 +5500,10 @@ bake_test_case SystemManual_testcases[] = {
     {
         "no_automerge",
         SystemManual_no_automerge
+    },
+    {
+        "dont_run_w_unmatching_entity_query",
+        SystemManual_dont_run_w_unmatching_entity_query
     }
 };
 
@@ -7773,7 +7818,7 @@ static bake_test_suite suites[] = {
         "Hierarchies",
         Hierarchies_setup,
         NULL,
-        77,
+        79,
         Hierarchies_testcases
     },
     {
@@ -7871,7 +7916,7 @@ static bake_test_suite suites[] = {
         "ComponentLifecycle",
         ComponentLifecycle_setup,
         NULL,
-        41,
+        42,
         ComponentLifecycle_testcases
     },
     {
@@ -7899,7 +7944,7 @@ static bake_test_suite suites[] = {
         "Queries",
         NULL,
         NULL,
-        32,
+        36,
         Queries_testcases
     },
     {
@@ -7920,7 +7965,7 @@ static bake_test_suite suites[] = {
         "TriggerOnRemove",
         NULL,
         NULL,
-        8,
+        9,
         TriggerOnRemove_testcases
     },
     {
@@ -7983,7 +8028,7 @@ static bake_test_suite suites[] = {
         "SystemManual",
         SystemManual_setup,
         NULL,
-        3,
+        4,
         SystemManual_testcases
     },
     {
