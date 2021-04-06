@@ -290,10 +290,7 @@ void init_edges(
             ecs_set_watch(world, ecs_pair_object(world, e));
         }
 
-        /* Register table with table index */
-        register_table(world, table, e, i);
-
-        /* If e is trait, register table for both type and subject */
+        /* Register table with lookup structures for components/relationships */
         if (ECS_HAS_ROLE(e, PAIR)) {
             ecs_entity_t type_w_wildcard = ecs_trait(
                 EcsWildcard, ecs_entity_t_hi(e));
@@ -306,8 +303,15 @@ void init_edges(
 
             ecs_entity_t all_wildcard = ecs_trait(EcsWildcard, EcsWildcard);
             register_table(world, table, all_wildcard, i);
+
+            register_table(world, table, e, i);
         } else {
             register_table(world, table, EcsWildcard, i);
+
+            /* Make sure that the generation is stripped from the id, in case it 
+             * is recycled. This enables lookups to be agnostic of generation,
+             * which can allow for more efficient storage. */
+            register_table(world, table, ecs_entity_t_lo(e), i);
         }
     }
 

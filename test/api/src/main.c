@@ -9,6 +9,15 @@
 #include <api.h>
 
 // Testsuite 'Rules'
+void Rules_comp_recycled_final_id(void);
+void Rules_comp_recycled_id(void);
+void Rules_pair_recycled_final_pred(void);
+void Rules_pair_recycled_pred(void);
+void Rules_pair_recycled_obj(void);
+void Rules_pair_recycled_pred_obj(void);
+void Rules_pair_recycled_matched_obj(void);
+void Rules_pair_recycled_matched_obj_2_terms(void);
+void Rules_pair_recycled_matched_pred_2_terms(void);
 void Rules_1_comp(void);
 void Rules_2_comp(void);
 void Rules_1_comp_explicit_subject(void);
@@ -1639,6 +1648,42 @@ void Error_log_error(void);
 void Deprecated_trait_type_str(void);
 
 bake_test_case Rules_testcases[] = {
+    {
+        "comp_recycled_final_id",
+        Rules_comp_recycled_final_id
+    },
+    {
+        "comp_recycled_id",
+        Rules_comp_recycled_id
+    },
+    {
+        "pair_recycled_final_pred",
+        Rules_pair_recycled_final_pred
+    },
+    {
+        "pair_recycled_pred",
+        Rules_pair_recycled_pred
+    },
+    {
+        "pair_recycled_obj",
+        Rules_pair_recycled_obj
+    },
+    {
+        "pair_recycled_pred_obj",
+        Rules_pair_recycled_pred_obj
+    },
+    {
+        "pair_recycled_matched_obj",
+        Rules_pair_recycled_matched_obj
+    },
+    {
+        "pair_recycled_matched_obj_2_terms",
+        Rules_pair_recycled_matched_obj_2_terms
+    },
+    {
+        "pair_recycled_matched_pred_2_terms",
+        Rules_pair_recycled_matched_pred_2_terms
+    },
     {
         "1_comp",
         Rules_1_comp
@@ -7762,7 +7807,7 @@ static bake_test_suite suites[] = {
         "Rules",
         NULL,
         NULL,
-        69,
+        78,
         Rules_testcases
     },
     {

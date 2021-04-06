@@ -15,6 +15,15 @@
         "testsuites": [{
             "id": "Rules",
             "testcases": [
+                "comp_recycled_final_id",
+                "comp_recycled_id",
+                "pair_recycled_final_pred",
+                "pair_recycled_pred",
+                "pair_recycled_obj",
+                "pair_recycled_pred_obj",
+                "pair_recycled_matched_obj",
+                "pair_recycled_matched_obj_2_terms",
+                "pair_recycled_matched_pred_2_terms",
                 "1_comp",
                 "2_comp",
                 "1_comp_explicit_subject",

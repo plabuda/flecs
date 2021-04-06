@@ -2627,7 +2627,9 @@ ecs_entity_t ecs_get_alive(
     ecs_entity_t entity)
 {
     ecs_assert(world != NULL, ECS_INVALID_PARAMETER, NULL);
-    ecs_assert(entity != 0, ECS_INVALID_PARAMETER, NULL);
+    if (!entity) {
+        return 0;
+    }
 
     if (ecs_is_alive(world, entity)) {
         return entity;

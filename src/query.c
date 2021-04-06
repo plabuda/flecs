@@ -1519,7 +1519,12 @@ void register_monitors(
     ecs_world_t *world,
     ecs_query_t *query)
 {
-    ecs_vector_each(query->sig.columns, ecs_sig_column_t, column, {
+    ecs_sig_column_t *columns = ecs_vector_first(query->sig.columns, ecs_sig_column_t);
+    int32_t i, count = ecs_vector_count(query->sig.columns);
+
+    for (i = 0; i < count; i ++) {
+        ecs_sig_column_t *column = &columns[i];
+
         /* If component is requested with CASCADE source register component as a
          * parent monitor. Parent monitors keep track of whether an entity moved
          * in the hierarchy, which potentially requires the query to reorder its
@@ -1562,7 +1567,7 @@ void register_monitors(
                 });
             }
         }
-    });
+    };
 }
 
 static

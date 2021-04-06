@@ -1,5 +1,350 @@
 #include <api.h>
 
+#define test_column_entity(it, column_id, str) {\
+    ecs_entity_t _column_entity_e = ecs_column_entity(it, column_id);\
+    test_assert(_column_entity_e != 0);\
+    char _column_entity[512];\
+    ecs_entity_str((it)->world, _column_entity_e, _column_entity, sizeof(_column_entity));\
+    test_str(_column_entity, str);\
+}
+
+#define test_column_source(it, column_id, str) {\
+    ecs_entity_t _column_source_e = ecs_column_source(it, column_id);\
+    test_assert(_column_source_e != 0);\
+    char _column_source[512];\
+    ecs_entity_str((it)->world, _column_source_e, _column_source, sizeof(_column_source));\
+    test_str(_column_source, str);\
+}
+
+#define test_var(it, var_id, str) {\
+    ecs_entity_t _var_e = ecs_rule_variable(it, var_id);\
+    test_assert(_var_e != 0);\
+    char _var[512];\
+    ecs_entity_str((it)->world, _var_e, _var, sizeof(_var));\
+    test_str(_var, str);\
+}
+
+void Rules_comp_recycled_id() {
+    ecs_world_t *world = ecs_init();
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Tag, 0);
+
+    /* Ensure recycled id */
+    test_assert(Tag != (uint32_t)Tag);
+
+    ecs_entity_t e = ecs_new_w_id(world, Tag);
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, Tag));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Tag");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "Tag");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_comp_recycled_final_id() {
+    ecs_world_t *world = ecs_init();
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Tag, Final);
+
+    /* Ensure recycled id */
+    test_assert(Tag != (uint32_t)Tag);
+
+    ecs_entity_t e = ecs_new_w_id(world, Tag);
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, Tag));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Tag");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "Tag");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_final_pred() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Obj, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Pred, Final);
+
+    /* Ensure recycled id */
+    test_assert(Pred != (uint32_t)Pred);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., X)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_pred() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Obj, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Pred, 0);
+
+    /* Ensure recycled id */
+    test_assert(Pred != (uint32_t)Pred);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., X)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_obj() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Pred, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Obj, 0);
+
+    /* Ensure recycled id */
+    test_assert(Obj != (uint32_t)Obj);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., Obj)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_pred_obj() {
+    ecs_world_t *world = ecs_init();
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+    ECS_ENTITY(world, Pred, 0);
+
+    dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+    ECS_ENTITY(world, Obj, 0);
+
+    /* Ensure recycled id */
+    test_assert(Pred != (uint32_t)Pred);
+    test_assert(Obj != (uint32_t)Obj);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., Obj)");
+    test_assert(r != NULL);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_matched_obj() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Pred, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Obj, 0);
+
+    /* Ensure recycled id */
+    test_assert(Obj != (uint32_t)Obj);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., X)");
+    test_assert(r != NULL);
+
+    int x_var = ecs_rule_find_variable(r, "X");
+    test_assert(x_var != -1);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+    test_var(&it, x_var, "Obj");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_matched_obj_2_terms() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Pred, 0);
+    ECS_ENTITY(world, Pred_2, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Obj, 0);
+
+    /* Ensure recycled id */
+    test_assert(Obj != (uint32_t)Obj);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_add_id(world, e, ecs_pair(Pred_2, Obj));
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred_2, Obj)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "Pred(., X), Pred_2(., X)");
+    test_assert(r != NULL);
+
+    int x_var = ecs_rule_find_variable(r, "X");
+    test_assert(x_var != -1);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+    test_column_entity(&it, 2, "(Pred_2,Obj)");
+    test_var(&it, x_var, "Obj");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
+void Rules_pair_recycled_matched_pred_2_terms() {
+    ecs_world_t *world = ecs_init();
+
+    ECS_ENTITY(world, Obj, 0);
+    ECS_ENTITY(world, Obj_2, 0);
+
+    ecs_entity_t dummy = ecs_new_id(world);
+    test_assert(dummy != 0);
+    ecs_delete(world, dummy);
+    test_assert(!ecs_is_alive(world, dummy));
+
+    ECS_ENTITY(world, Pred, 0);
+
+    /* Ensure recycled id */
+    test_assert(Pred != (uint32_t)Pred);
+
+    ecs_entity_t e = ecs_new_w_id(world, ecs_pair(Pred, Obj));
+    test_assert(e != 0);
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj)));
+
+    ecs_add_id(world, e, ecs_pair(Pred, Obj_2));
+    test_assert(ecs_has_id(world, e, ecs_pair(Pred, Obj_2)));
+
+    ecs_rule_t *r = ecs_rule_new(world, "X(., Obj), X(., Obj_2)");
+    test_assert(r != NULL);
+
+    int x_var = ecs_rule_find_variable(r, "X");
+    test_assert(x_var != -1);
+
+    ecs_iter_t it = ecs_rule_iter(r);
+    test_assert(ecs_rule_next(&it));
+    test_int(it.count, 1);
+    test_int(it.entities[0], e);
+    test_column_entity(&it, 1, "(Pred,Obj)");
+    test_column_entity(&it, 2, "(Pred,Obj_2)");
+    test_var(&it, x_var, "Pred");
+
+    test_assert(!ecs_rule_next(&it));
+
+    ecs_fini(world);
+}
+
 static
 void test_1_comp(const char *expr) {
     ecs_world_t *world = ecs_init();
@@ -389,30 +734,6 @@ void Rules_find_2_pairs() {
     test_assert(!ecs_rule_next(&it));
     
     ecs_fini(world);
-}
-
-#define test_column_entity(it, column_id, str) {\
-    ecs_entity_t _column_entity_e = ecs_column_entity(it, column_id);\
-    test_assert(_column_entity_e != 0);\
-    char _column_entity[512];\
-    ecs_entity_str((it)->world, _column_entity_e, _column_entity, sizeof(_column_entity));\
-    test_str(_column_entity, str);\
-}
-
-#define test_column_source(it, column_id, str) {\
-    ecs_entity_t _column_source_e = ecs_column_source(it, column_id);\
-    test_assert(_column_source_e != 0);\
-    char _column_source[512];\
-    ecs_entity_str((it)->world, _column_source_e, _column_source, sizeof(_column_source));\
-    test_str(_column_source, str);\
-}
-
-#define test_var(it, var_id, str) {\
-    ecs_entity_t _var_e = ecs_rule_variable(it, var_id);\
-    test_assert(_var_e != 0);\
-    char _var[512];\
-    ecs_entity_str((it)->world, _var_e, _var, sizeof(_var));\
-    test_str(_var, str);\
 }
 
 void Rules_find_w_pred_var() {
