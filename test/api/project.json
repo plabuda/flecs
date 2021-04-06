@@ -707,7 +707,6 @@
                 "invalid_container_without_id",
                 "invalid_cascade_without_id",
                 "invalid_entity_without_id",
-                "invalid_empty_without_id",
                 "invalid_singleton_without_id",
                 "invalid_empty_element",
                 "invalid_empty_element_w_space",

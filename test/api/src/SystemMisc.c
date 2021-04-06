@@ -87,18 +87,6 @@ void SystemMisc_invalid_entity_without_id() {
     ecs_fini(world);
 }
 
-void SystemMisc_invalid_empty_without_id() {
-    install_test_abort();
-
-    ecs_world_t *world = ecs_init();
-
-    test_expect_abort();
-
-    ECS_SYSTEM(world, Dummy, EcsOnUpdate, .);
-
-    ecs_fini(world);
-}
-
 void SystemMisc_invalid_singleton_without_id() {
     install_test_abort();
 
@@ -366,13 +354,13 @@ void SystemMisc_invalid_empty_string() {
 }
 
 void SystemMisc_invalid_empty_string_w_space() {
-    install_test_abort();
-
     ecs_world_t *world = ecs_init();
 
-    test_expect_abort();
-
     ecs_new_system(world, 0, "Dummy", EcsOnUpdate, "  ", Dummy);
+
+    ecs_progress(world, 0);
+
+    test_assert(dummy_invoked == true);   
 
     ecs_fini(world);
 }
@@ -387,7 +375,7 @@ void SystemMisc_invalid_mixed_src_modifier() {
 
     test_expect_abort();
 
-    ecs_new_system(world, 0, "SHARED:Position || Velocity", EcsOnUpdate, "  ", Dummy);
+    ecs_new_system(world, 0, "Dummy", EcsOnUpdate, "SHARED:Position || Velocity", Dummy);
 
     ecs_fini(world);
 }

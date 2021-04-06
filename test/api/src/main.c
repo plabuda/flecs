@@ -653,7 +653,6 @@ void SystemMisc_invalid_system_without_id(void);
 void SystemMisc_invalid_container_without_id(void);
 void SystemMisc_invalid_cascade_without_id(void);
 void SystemMisc_invalid_entity_without_id(void);
-void SystemMisc_invalid_empty_without_id(void);
 void SystemMisc_invalid_singleton_without_id(void);
 void SystemMisc_invalid_empty_element(void);
 void SystemMisc_invalid_empty_element_w_space(void);
@@ -4063,10 +4062,6 @@ bake_test_case SystemMisc_testcases[] = {
     {
         "invalid_entity_without_id",
         SystemMisc_invalid_entity_without_id
-    },
-    {
-        "invalid_empty_without_id",
-        SystemMisc_invalid_empty_without_id
     },
     {
         "invalid_singleton_without_id",
@@ -7975,7 +7970,7 @@ static bake_test_suite suites[] = {
         "SystemMisc",
         SystemMisc_setup,
         NULL,
-        84,
+        83,
         SystemMisc_testcases
     },
     {
