@@ -1,0 +1,8 @@
+{
+  "name": "flecs",
+  "version": "1.0.0",
+  "repo": "plabuda/flecs",
+  "description": "flecs ECS system by Sander Mertens",
+  "license": "MIT",
+  "src": ["flecs.c", "flecs.h"]
+}
